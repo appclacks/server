@@ -60,7 +60,10 @@ func runServer(logger *slog.Logger) error {
 		syscall.SIGINT,
 		syscall.SIGTERM)
 
-	server.Start()
+	err = server.Start()
+	if err != nil {
+		return err
+	}
 	go func() {
 		for sig := range signals {
 			switch sig {

@@ -104,29 +104,29 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 
 }
 
-func (s *Server) Start() {
+func (s *Server) Start() error {
 	address := fmt.Sprintf("[%s]:%d", s.config.Host, s.config.Port)
 	s.logger.Info(fmt.Sprintf("http server starting on %s", address))
+	if s.config.Cert != "" {
+		s.logger.Info("tls is enabled on the http server")
+		tlsConfig, err := getTLSConfig(s.config.Key, s.config.Cert, s.config.Cacert, s.config.ServerName, s.config.Insecure)
+		if err != nil {
+			return err
+		}
+
+		s.server.TLSServer.TLSConfig = tlsConfig
+		tlsServer := s.server.TLSServer
+		tlsServer.Addr = address
+		if !s.server.DisableHTTP2 {
+			tlsServer.TLSConfig.NextProtos = append(tlsServer.TLSConfig.NextProtos, "h2")
+		}
+	}
 
 	go func() {
 		defer s.wg.Done()
 		var err error
 		if s.config.Cert != "" {
-			s.logger.Info("tls is enabled on the http server")
-			tlsConfig, err := getTLSConfig(s.config.Key, s.config.Cert, s.config.Cacert, s.config.ServerName, s.config.Insecure)
-			if err != nil {
-				s.logger.Error(fmt.Sprintf("fail to create tls configuration: %s", err.Error()))
-				os.Exit(2)
-				return
-			}
-
-			s.server.TLSServer.TLSConfig = tlsConfig
-			tlsServer := s.server.TLSServer
-			tlsServer.Addr = address
-			if !s.server.DisableHTTP2 {
-				tlsServer.TLSConfig.NextProtos = append(tlsServer.TLSConfig.NextProtos, "h2")
-			}
-			err = s.server.StartServer(tlsServer)
+			err = s.server.StartServer(s.server.TLSServer)
 		} else {
 			err = s.server.Start(address)
 
@@ -138,6 +138,7 @@ func (s *Server) Start() {
 
 	}()
 	s.wg.Add(1)
+	return nil
 }
 
 func (s *Server) Stop() error {

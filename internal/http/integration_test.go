@@ -134,7 +134,8 @@ func TestIntegration(t *testing.T) {
 	_, err = store.Exec("truncate healthcheck cascade;")
 	assert.NoError(t, err)
 
-	server.Start()
+	err = server.Start()
+	assert.NoError(t, err)
 	time.Sleep(1 * time.Second)
 
 	// healthchecks
