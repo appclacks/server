@@ -49,17 +49,11 @@ func toHealthcheck(healthcheck aggregates.Healthcheck) client.Healthcheck {
 	return result
 }
 
-func toHealthchecks(healthchecks []*aggregates.Healthcheck, filter *regexp.Regexp) []client.Healthcheck {
+func toHealthchecks(healthchecks []*aggregates.Healthcheck) []client.Healthcheck {
 	result := []client.Healthcheck{}
 	for i := range healthchecks {
 		check := *healthchecks[i]
-		if filter == nil {
-			result = append(result, toHealthcheck(check))
-		} else {
-			if filter.MatchString(check.Name) {
-				result = append(result, toHealthcheck(check))
-			}
-		}
+		result = append(result, toHealthcheck(check))
 	}
 	return result
 }
@@ -112,12 +106,12 @@ func (b *Builder) ListHealthchecks(ec echo.Context) error {
 			return er.New("Invalid regex for the name-pattern parameter", er.BadRequest, true)
 		}
 	}
-	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context())
+	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context(), nameRegex)
 	if err != nil {
 		return err
 	}
 	result := client.ListHealthchecksOutput{
-		Result: toHealthchecks(healthchecks, nameRegex),
+		Result: toHealthchecks(healthchecks),
 	}
 
 	return ec.JSON(http.StatusOK, result)
@@ -146,7 +140,7 @@ func (b *Builder) CabourotteDiscovery(ec echo.Context) error {
 			labels[kvSplitted[0]] = kvSplitted[1]
 		}
 	}
-	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context())
+	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context(), nil)
 	if err != nil {
 		return err
 	}
