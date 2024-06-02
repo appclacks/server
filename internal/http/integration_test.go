@@ -241,6 +241,20 @@ func TestIntegration(t *testing.T) {
 	assert.Equal(t, dnsResult.ID, getHealthcheckResult.ID)
 	assert.Equal(t, dnsResult.Name, getHealthcheckResult.Name)
 
+	getByNameHealthcheckCase := testCase{
+		url:            fmt.Sprintf("/api/v1/healthcheck/%s", dnsResult.Name),
+		expectedStatus: 200,
+		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+
+	getByNameHealthcheckResult := client.Healthcheck{}
+	testHTTP(t, getByNameHealthcheckCase, &getByNameHealthcheckResult)
+	assert.Equal(t, dnsResult.ID, getByNameHealthcheckResult.ID)
+	assert.Equal(t, dnsResult.Name, getByNameHealthcheckResult.Name)
+
 	// update
 
 	dnsUpdateInput := client.UpdateDNSHealthcheckInput{
@@ -296,6 +310,266 @@ func TestIntegration(t *testing.T) {
 		},
 	}
 	testHTTP(t, getHealthcheckCase, nil)
+
+	// more checks types
+
+	// tcp
+
+	tcpInput := client.CreateTCPHealthcheckInput{
+		Timeout:     "3s",
+		Name:        "tcp3",
+		Description: "toto",
+		Enabled:     true,
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Interval: "100s",
+		HealthcheckTCPDefinition: client.HealthcheckTCPDefinition{
+			Target: "mcorbin.fr",
+			Port:   443,
+		},
+	}
+
+	createTCPCheckCase := testCase{
+		url:            "/api/v1/healthcheck/tcp",
+		expectedStatus: 200,
+		payload:        tcpInput,
+		method:         "POST",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	tcpResult := client.Healthcheck{}
+	testHTTP(t, createTCPCheckCase, &tcpResult)
+	assert.Equal(t, tcpInput.Name, tcpResult.Name)
+	assert.Equal(t, true, tcpResult.Enabled)
+	assert.NotEqual(t, "", tcpResult.ID)
+
+	tcpUpdateInput := client.UpdateTCPHealthcheckInput{
+		ID:          tcpResult.ID,
+		Timeout:     "3s",
+		Name:        "tcp4",
+		Description: "toto",
+		Enabled:     false,
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Interval: "100s",
+		HealthcheckTCPDefinition: client.HealthcheckTCPDefinition{
+			Target: "mcorbin.fr",
+			Port:   443,
+		},
+	}
+
+	updateTCPCheckCase := testCase{
+		url:            fmt.Sprintf("/api/v1/healthcheck/tcp/%s", tcpResult.ID),
+		expectedStatus: 200,
+		payload:        tcpUpdateInput,
+		method:         "PUT",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	tcpUpdateResult := client.Healthcheck{}
+	testHTTP(t, updateTCPCheckCase, &tcpUpdateResult)
+	assert.Equal(t, tcpUpdateInput.Name, tcpUpdateResult.Name)
+	assert.Equal(t, false, tcpUpdateResult.Enabled)
+	assert.NotEqual(t, "", tcpUpdateResult.ID)
+
+	// tls
+
+	tlsInput := client.CreateTLSHealthcheckInput{
+		Timeout:     "3s",
+		Name:        "tls3",
+		Description: "toto",
+		Enabled:     true,
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Interval: "100s",
+		HealthcheckTLSDefinition: client.HealthcheckTLSDefinition{
+			Target: "mcorbin.fr",
+			Port:   443,
+		},
+	}
+
+	createTLSCheckCase := testCase{
+		url:            "/api/v1/healthcheck/tls",
+		expectedStatus: 200,
+		payload:        tlsInput,
+		method:         "POST",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	tlsResult := client.Healthcheck{}
+	testHTTP(t, createTLSCheckCase, &tlsResult)
+	assert.Equal(t, tlsInput.Name, tlsResult.Name)
+	assert.Equal(t, true, tlsResult.Enabled)
+	assert.NotEqual(t, "", tlsResult.ID)
+
+	tlsUpdateInput := client.UpdateTLSHealthcheckInput{
+		ID:          tlsResult.ID,
+		Timeout:     "3s",
+		Name:        "tls4",
+		Description: "toto",
+		Enabled:     false,
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Interval: "100s",
+		HealthcheckTLSDefinition: client.HealthcheckTLSDefinition{
+			Target: "mcorbin.fr",
+			Port:   443,
+		},
+	}
+
+	updateTLSCheckCase := testCase{
+		url:            fmt.Sprintf("/api/v1/healthcheck/tls/%s", tlsResult.ID),
+		expectedStatus: 200,
+		payload:        tlsUpdateInput,
+		method:         "PUT",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	tlsUpdateResult := client.Healthcheck{}
+	testHTTP(t, updateTLSCheckCase, &tlsUpdateResult)
+	assert.Equal(t, tlsUpdateInput.Name, tlsUpdateResult.Name)
+	assert.Equal(t, false, tlsUpdateResult.Enabled)
+	assert.NotEqual(t, "", tlsUpdateResult.ID)
+
+	// http
+
+	httpInput := client.CreateHTTPHealthcheckInput{
+		Timeout:     "3s",
+		Name:        "http3",
+		Description: "toto",
+		Enabled:     true,
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Interval: "100s",
+		HealthcheckHTTPDefinition: client.HealthcheckHTTPDefinition{
+			Target:      "mcorbin.fr",
+			Port:        443,
+			ValidStatus: []uint{200, 201},
+			Protocol:    "http",
+			Method:      "GET",
+		},
+	}
+
+	createHTTPCheckCase := testCase{
+		url:            "/api/v1/healthcheck/http",
+		expectedStatus: 200,
+		payload:        httpInput,
+		method:         "POST",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	httpResult := client.Healthcheck{}
+	testHTTP(t, createHTTPCheckCase, &httpResult)
+	assert.Equal(t, httpInput.Name, httpResult.Name)
+	assert.Equal(t, true, httpResult.Enabled)
+	assert.NotEqual(t, "", httpResult.ID)
+
+	httpUpdateInput := client.UpdateHTTPHealthcheckInput{
+		ID:          httpResult.ID,
+		Timeout:     "3s",
+		Name:        "http4",
+		Description: "toto",
+		Enabled:     false,
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Interval: "100s",
+		HealthcheckHTTPDefinition: client.HealthcheckHTTPDefinition{
+			Target:      "mcorbin.fr",
+			Port:        443,
+			ValidStatus: []uint{200, 201},
+			Protocol:    "http",
+			Method:      "GET",
+		},
+	}
+
+	updateHTTPCheckCase := testCase{
+		url:            fmt.Sprintf("/api/v1/healthcheck/http/%s", httpResult.ID),
+		expectedStatus: 200,
+		payload:        httpUpdateInput,
+		method:         "PUT",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	httpUpdateResult := client.Healthcheck{}
+	testHTTP(t, updateHTTPCheckCase, &httpUpdateResult)
+	assert.Equal(t, httpUpdateInput.Name, httpUpdateResult.Name)
+	assert.Equal(t, false, httpUpdateResult.Enabled)
+	assert.NotEqual(t, "", httpUpdateResult.ID)
+
+	// command
+
+	commandInput := client.CreateCommandHealthcheckInput{
+		Timeout:     "3s",
+		Name:        "command3",
+		Description: "toto",
+		Enabled:     true,
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Interval: "100s",
+		HealthcheckCommandDefinition: client.HealthcheckCommandDefinition{
+			Command:   "ls",
+			Arguments: []string{"-l"},
+		},
+	}
+
+	createCommandCheckCase := testCase{
+		url:            "/api/v1/healthcheck/command",
+		expectedStatus: 200,
+		payload:        commandInput,
+		method:         "POST",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	commandResult := client.Healthcheck{}
+	testHTTP(t, createCommandCheckCase, &commandResult)
+	assert.Equal(t, commandInput.Name, commandResult.Name)
+	assert.Equal(t, true, commandResult.Enabled)
+	assert.NotEqual(t, "", commandResult.ID)
+
+	commandUpdateInput := client.UpdateCommandHealthcheckInput{
+		ID:          commandResult.ID,
+		Timeout:     "3s",
+		Name:        "command4",
+		Description: "toto",
+		Enabled:     false,
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Interval: "100s",
+		HealthcheckCommandDefinition: client.HealthcheckCommandDefinition{
+			Command:   "ls",
+			Arguments: []string{"-la"},
+		},
+	}
+
+	updateCommandCheckCase := testCase{
+		url:            fmt.Sprintf("/api/v1/healthcheck/command/%s", commandResult.ID),
+		expectedStatus: 200,
+		payload:        commandUpdateInput,
+		method:         "PUT",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	commandUpdateResult := client.Healthcheck{}
+	testHTTP(t, updateCommandCheckCase, &commandUpdateResult)
+	assert.Equal(t, commandUpdateInput.Name, commandUpdateResult.Name)
+	assert.Equal(t, false, commandUpdateResult.Enabled)
+	assert.NotEqual(t, "", commandUpdateResult.ID)
 
 	// metrics
 
@@ -372,6 +646,15 @@ func TestIntegration(t *testing.T) {
 			method:         "GET",
 			headers: map[string]string{
 				"Authorization": basicAuth("invalid_user", testPassword),
+			},
+		},
+		{
+			url:            "/api/v1/healthcheck/aozjiji827YH82",
+			expectedStatus: 404,
+			body:           "healthcheck not found",
+			method:         "GET",
+			headers: map[string]string{
+				"Authorization": basicAuth(testUser, testPassword),
 			},
 		},
 	}

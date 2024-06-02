@@ -55,10 +55,10 @@ func (c *Database) CreateHealthcheck(ctx context.Context, healthcheck *aggregate
 	err := c.DB.GetContext(ctx, &checkExists, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE name=$1", healthcheck.Name)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			return errors.Wrapf(err, "Fail to get healthcheck %s", healthcheck.Name)
+			return errors.Wrapf(err, "fail to get healthcheck %s", healthcheck.Name)
 		}
 	} else {
-		return er.Newf("A healthcheck named %s already exists", er.Conflict, true, healthcheck.Name)
+		return er.Newf("a healthcheck named %s already exists", er.Conflict, true, healthcheck.Name)
 	}
 	labels, err := labelsToString(healthcheck.Labels)
 	if err != nil {
@@ -83,7 +83,7 @@ func (c *Database) CreateHealthcheck(ctx context.Context, healthcheck *aggregate
 	}
 	result, err := c.DB.NamedExecContext(ctx, "INSERT INTO healthcheck (id, name, description, labels, created_at, definition, type, interval, random_id, enabled, timeout) VALUES (:id, :name, :description, :labels, :created_at, :definition, :type, :interval, :random_id, :enabled, :timeout)", dbHealthcheck)
 	if err != nil {
-		return errors.Wrapf(err, "Fail to create healthcheck %s", healthcheck.Name)
+		return errors.Wrapf(err, "fail to create healthcheck %s", healthcheck.Name)
 	}
 	err = checkResult(result, 1)
 	if err != nil {
@@ -120,9 +120,9 @@ func (c *Database) GetHealthcheckByName(ctx context.Context, name string) (*aggr
 	err := c.DB.GetContext(ctx, &healthcheck, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE name=$1", name)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			return nil, errors.Wrapf(err, "Fail to get healthcheck %s", name)
+			return nil, errors.Wrapf(err, "fail to get healthcheck %s", name)
 		} else {
-			return nil, er.New("Healthcheck not found", er.NotFound, true)
+			return nil, er.New("healthcheck not found", er.NotFound, true)
 		}
 	}
 	return toHealthcheck(&healthcheck)
@@ -133,9 +133,9 @@ func (c *Database) getHealthcheckTX(ctx context.Context, tx *sqlx.Tx, id string)
 	err := tx.GetContext(ctx, &healthcheck, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE id=$1", id)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			return nil, errors.Wrapf(err, "Fail to get healthcheck %s", id)
+			return nil, errors.Wrapf(err, "fail to get healthcheck %s", id)
 		} else {
-			return nil, er.New("Healthcheck not found", er.NotFound, true)
+			return nil, er.New("healthcheck not found", er.NotFound, true)
 		}
 	}
 	return toHealthcheck(&healthcheck)
@@ -148,7 +148,7 @@ func (c *Database) DeleteHealthcheck(ctx context.Context, id string) error {
 	}
 	result, err := c.DB.ExecContext(ctx, "DELETE FROM healthcheck WHERE id=$1", id)
 	if err != nil {
-		return errors.Wrap(err, "Fail to delete healthcheck")
+		return errors.Wrap(err, "fail to delete healthcheck")
 	}
 	err = checkResult(result, 1)
 	if err != nil {
@@ -161,7 +161,7 @@ func (c *Database) ListHealthchecks(ctx context.Context) ([]*aggregates.Healthch
 	healthchecks := []Healthcheck{}
 	err := c.DB.SelectContext(ctx, &healthchecks, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck")
 	if err != nil {
-		return nil, errors.Wrapf(err, "Fail to list healthchecks")
+		return nil, errors.Wrapf(err, "fail to list healthchecks")
 	}
 	result := []*aggregates.Healthcheck{}
 	for i := range healthchecks {
@@ -180,7 +180,7 @@ func (c *Database) ListHealthchecksForProber(ctx context.Context, prober int) ([
 	healthchecks := []Healthcheck{}
 	err := c.DB.SelectContext(ctx, &healthchecks, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE healthcheck.random_id%$1=$2 AND healthcheck.enabled=true", c.probers, prober)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Fail to list healthchecks")
+		return nil, errors.Wrapf(err, "fail to list healthchecks")
 	}
 	result := []*aggregates.Healthcheck{}
 	for i := range healthchecks {
@@ -214,7 +214,7 @@ func (c *Database) UpdateHealthcheck(ctx context.Context, update *aggregates.Hea
 	err = tx.GetContext(ctx, &checkExists, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE name=$1", update.Name)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			return errors.Wrapf(err, "Fail to get healthcheck %s", healthcheck.Name)
+			return errors.Wrapf(err, "fail to get healthcheck %s", healthcheck.Name)
 		}
 	} else {
 		if checkExists.ID != update.ID {
@@ -241,7 +241,7 @@ func (c *Database) UpdateHealthcheck(ctx context.Context, update *aggregates.Hea
 	}
 	result, err := c.DB.NamedExecContext(ctx, "update healthcheck set name=:name, description=:description, labels=:labels, definition=:definition, interval=:interval, enabled=:enabled, timeout=:timeout where id=:id", dbHealthcheck)
 	if err != nil {
-		return errors.Wrapf(err, "Fail to update healthcheck %s", healthcheck.ID)
+		return errors.Wrapf(err, "fail to update healthcheck %s", healthcheck.ID)
 	}
 	err = checkResult(result, 1)
 	if err != nil {
