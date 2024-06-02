@@ -2,7 +2,6 @@ package http_test
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -44,9 +43,9 @@ func readBody(t *testing.T, body io.ReadCloser) []byte {
 	return b
 }
 
-func basicAuth(username, password string) string {
-	return fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))))
-}
+// func basicAuth(username, password string) string {
+// 	return fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))))
+// }
 
 type testCase struct {
 	url            string
