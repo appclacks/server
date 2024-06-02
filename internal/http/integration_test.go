@@ -107,7 +107,7 @@ func TestIntegration(t *testing.T) {
 	reg := prometheus.NewRegistry()
 	config := config.Configuration{
 		Database: database.Configuration{
-			Migrations: "/home/mcorbin/appclacks/server/dev/migrations",
+			Migrations: "../../dev/migrations",
 			Username:   "appclacks",
 			Password:   "appclacks",
 			Database:   "appclacks",
