@@ -72,8 +72,8 @@ func (s *Service) UpdateHealthcheck(ctx context.Context, healthcheck *aggregates
 	if err != nil {
 		return er.New("Invalid healthcheck interval", er.BadRequest, true)
 	}
-	if interval < 30*time.Second {
-		return er.New("The minimum healthcheck interval is 30 seconds", er.BadRequest, true)
+	if interval < 2*time.Second {
+		return er.New("The minimum healthcheck interval is 2 seconds", er.BadRequest, true)
 	}
 	timeout, err := time.ParseDuration(healthcheck.Timeout)
 	if err != nil {
