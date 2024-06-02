@@ -14,7 +14,7 @@ var TestComponent *database.Database
 func InitTestDB(logger *slog.Logger) *database.Database {
 
 	config := database.Configuration{
-		Migrations: "/home/mcorbin/appclacks/server/dev/migrations",
+		Migrations: "../../dev/migrations",
 		Username:   "appclacks",
 		Password:   "appclacks",
 		Database:   "appclacks",
