@@ -1,12 +1,14 @@
 package http
 
-// BasicAuth basic auth for the configuration
 type BasicAuth struct {
 	Username string
 	Password string
 }
 
-// Configuration the HTTP server configuration
+type Metrics struct {
+	BasicAuth BasicAuth `yaml:"basic-auth"`
+}
+
 type Configuration struct {
 	Host       string `validate:"required"`
 	Port       uint32 `validate:"required"`
@@ -16,4 +18,5 @@ type Configuration struct {
 	Insecure   bool
 	ServerName string
 	BasicAuth  BasicAuth `yaml:"basic-auth"`
+	Metrics    Metrics
 }

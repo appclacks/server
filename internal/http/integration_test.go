@@ -2,6 +2,7 @@ package http_test
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -43,9 +44,9 @@ func readBody(t *testing.T, body io.ReadCloser) []byte {
 	return b
 }
 
-// func basicAuth(username, password string) string {
-// 	return fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))))
-// }
+func basicAuth(username, password string) string {
+	return fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))))
+}
 
 type testCase struct {
 	url            string
@@ -94,7 +95,7 @@ func testHTTP(t *testing.T, c testCase, result any) {
 	response, err := httpClient.Do(request)
 	assert.NoError(t, err)
 	body := readBody(t, response.Body)
-	assert.Equal(t, response.StatusCode, c.expectedStatus, string(body))
+	assert.Equal(t, c.expectedStatus, response.StatusCode, string(body))
 	if result != nil {
 		fromJson(t, result, body)
 	}
@@ -104,6 +105,11 @@ func testHTTP(t *testing.T, c testCase, result any) {
 }
 
 func TestIntegration(t *testing.T) {
+	testUser := "testuser"
+	testPassword := "testPassword"
+	metricsUser := "metricsuser"
+	metricsPassword := "metricsPassword"
+
 	reg := prometheus.NewRegistry()
 	config := config.Configuration{
 		Database: database.Configuration{
@@ -118,6 +124,16 @@ func TestIntegration(t *testing.T) {
 		HTTP: apihttp.Configuration{
 			Host: "127.0.0.1",
 			Port: 10000,
+			BasicAuth: apihttp.BasicAuth{
+				Username: testUser,
+				Password: testPassword,
+			},
+			Metrics: apihttp.Metrics{
+				BasicAuth: apihttp.BasicAuth{
+					Username: metricsUser,
+					Password: metricsPassword,
+				},
+			},
 		},
 		Healthchecks: config.Healthchecks{
 			Probers: 1,
@@ -157,6 +173,9 @@ func TestIntegration(t *testing.T) {
 		expectedStatus: 200,
 		payload:        dnsInput,
 		method:         "POST",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
 	}
 
 	dnsResult := client.Healthcheck{}
@@ -172,6 +191,9 @@ func TestIntegration(t *testing.T) {
 		url:            "/api/v1/healthcheck",
 		expectedStatus: 200,
 		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
 	}
 
 	listHealthcheckResult := client.ListHealthchecksOutput{}
@@ -183,6 +205,9 @@ func TestIntegration(t *testing.T) {
 		url:            "/api/v1/healthcheck?name-pattern=trololo",
 		expectedStatus: 200,
 		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
 	}
 
 	testHTTP(t, listHealthcheckCaseRegex, &listHealthcheckResult)
@@ -192,6 +217,9 @@ func TestIntegration(t *testing.T) {
 		url:            "/api/v1/healthcheck?name-pattern=dns",
 		expectedStatus: 200,
 		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
 	}
 
 	testHTTP(t, listHealthcheckCaseRegexMatch, &listHealthcheckResult)
@@ -203,6 +231,9 @@ func TestIntegration(t *testing.T) {
 		url:            fmt.Sprintf("/api/v1/healthcheck/%s", dnsResult.ID),
 		expectedStatus: 200,
 		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
 	}
 
 	getHealthcheckResult := client.Healthcheck{}
@@ -230,6 +261,9 @@ func TestIntegration(t *testing.T) {
 		expectedStatus: 200,
 		payload:        dnsUpdateInput,
 		method:         "PUT",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
 	}
 
 	dnsResult = client.Healthcheck{}
@@ -246,6 +280,9 @@ func TestIntegration(t *testing.T) {
 		url:            fmt.Sprintf("/api/v1/healthcheck/%s", dnsResult.ID),
 		expectedStatus: 200,
 		method:         "DELETE",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
 	}
 
 	testHTTP(t, deleteHealthcheckCase, nil)
@@ -254,7 +291,92 @@ func TestIntegration(t *testing.T) {
 		url:            fmt.Sprintf("/api/v1/healthcheck/%s", dnsResult.ID),
 		expectedStatus: 404,
 		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
 	}
 	testHTTP(t, getHealthcheckCase, nil)
+
+	// metrics
+
+	getHealthcheckCase = testCase{
+		url:            "/metrics",
+		expectedStatus: 200,
+		method:         "GET",
+		body:           "http_request",
+		headers: map[string]string{
+			"Authorization": basicAuth(metricsUser, metricsPassword),
+		},
+	}
+	testHTTP(t, getHealthcheckCase, nil)
+
+	cases := []testCase{
+		{
+			url:            "/healthz",
+			expectedStatus: 200,
+			method:         "GET",
+		},
+		{
+			url:            "/metrics",
+			expectedStatus: 401,
+			method:         "GET",
+		},
+		{
+			url:            "/metrics",
+			expectedStatus: 401,
+			method:         "GET",
+			headers: map[string]string{
+				"Authorization": basicAuth(testUser, testPassword),
+			},
+		},
+		{
+			url:            "/metrics",
+			expectedStatus: 401,
+			method:         "GET",
+			headers: map[string]string{
+				"Authorization": basicAuth(metricsUser, "invalid_pass"),
+			},
+		},
+		{
+			url:            "/api/v1/healthchecks",
+			expectedStatus: 401,
+			method:         "GET",
+			headers: map[string]string{
+				"Authorization": basicAuth(metricsUser, "invalid_pass"),
+			},
+		},
+		{
+			url:            "/api/v1/healthchecks",
+			expectedStatus: 401,
+			method:         "GET",
+			headers: map[string]string{
+				"Authorization": basicAuth("invalid_user", metricsPassword),
+			},
+		},
+		{
+			url:            "/api/v1/healthcheck",
+			expectedStatus: 401,
+			method:         "GET",
+		},
+		{
+			url:            "/api/v1/healthcheck",
+			expectedStatus: 401,
+			method:         "GET",
+			headers: map[string]string{
+				"Authorization": basicAuth(testUser, "invalid_pass"),
+			},
+		},
+		{
+			url:            "/api/v1/healthcheck",
+			expectedStatus: 401,
+			method:         "GET",
+			headers: map[string]string{
+				"Authorization": basicAuth("invalid_user", testPassword),
+			},
+		},
+	}
+	for _, c := range cases {
+		testHTTP(t, c, nil)
+	}
 
 }

@@ -62,29 +62,17 @@ func errorHandler(logger *slog.Logger) func(err error, c echo.Context) {
 					}
 					return
 				}
-				if echoError.Code == http.StatusMethodNotAllowed {
-					err := c.JSON(http.StatusMethodNotAllowed, er.Error{
-						Messages: []string{"method not allowed"},
-					})
-					if err != nil {
-						logger.Error(err.Error())
-						c.Response().Status = http.StatusInternalServerError
-					}
-					return
+				err = c.JSON(echoError.Code, er.Error{
+					Messages: []string{fmt.Sprintf("%v", echoError.Message)},
+				})
+				if err != nil {
+					logger.Error(err.Error())
+					c.Response().Status = http.StatusInternalServerError
 				}
-				if echoError.Code == http.StatusNotFound {
-					err := c.JSON(http.StatusNotFound, er.Error{
-						Messages: []string{"not found"},
-					})
-					if err != nil {
-						logger.Warn(err.Error())
-						c.Response().Status = http.StatusInternalServerError
-					}
-					return
-				}
+				return
 			}
 			err = c.JSON(http.StatusInternalServerError, er.Error{
-				Messages: []string{"internal server error"},
+				Messages: []string{err.Error()},
 			})
 			if err != nil {
 				logger.Error(err.Error())

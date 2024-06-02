@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"crypto/subtle"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"github.com/appclacks/server/internal/http/middlewares"
 	"github.com/appclacks/server/internal/validator"
 	"github.com/labstack/echo/v4"
+	echomw "github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -77,9 +79,31 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 	e.GET("/healthz", func(ec echo.Context) error {
 		return ec.JSON(http.StatusOK, "ok")
 	})
-	e.GET("/metrics", echo.WrapHandler(promhttp.HandlerFor(registry, promhttp.HandlerOpts{})))
+
+	if config.Metrics.BasicAuth.Username != "" {
+		basicAuth := echomw.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+			if subtle.ConstantTimeCompare([]byte(username), []byte(config.Metrics.BasicAuth.Username)) == 1 &&
+				subtle.ConstantTimeCompare([]byte(password), []byte(config.Metrics.BasicAuth.Password)) == 1 {
+				return true, nil
+			}
+			return false, nil
+		})
+		e.GET("/metrics", echo.WrapHandler(promhttp.HandlerFor(registry, promhttp.HandlerOpts{})), basicAuth)
+	} else {
+		e.GET("/metrics", echo.WrapHandler(promhttp.HandlerFor(registry, promhttp.HandlerOpts{})))
+	}
 
 	apiGroup := e.Group("/api/v1")
+	if config.BasicAuth.Username != "" {
+		basicAuth := echomw.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+			if subtle.ConstantTimeCompare([]byte(username), []byte(config.BasicAuth.Username)) == 1 &&
+				subtle.ConstantTimeCompare([]byte(password), []byte(config.BasicAuth.Password)) == 1 {
+				return true, nil
+			}
+			return false, nil
+		})
+		apiGroup.Use(basicAuth)
+	}
 
 	apiGroup.POST("/healthcheck/dns", builder.CreateDNSHealthcheck)
 	apiGroup.PUT("/healthcheck/dns/:id", builder.UpdateDNSHealthcheck)

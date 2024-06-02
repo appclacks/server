@@ -2,9 +2,9 @@
 http:
   host: 127.0.0.1
   port: 9000
-  # basic-auth:
-  #   username: "foo"
-  #   password: "bar"
+  basic-auth:
+    username: "foo"
+    password: "bar"
 database:
   migrations: "/home/mcorbin/appclacks/api/dev/migrations"
   username: "appclacks"
