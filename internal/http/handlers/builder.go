@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
 )
@@ -13,7 +12,7 @@ type HealthcheckService interface {
 	GetHealthcheck(ctx context.Context, id string) (*aggregates.Healthcheck, error)
 	GetHealthcheckByName(ctx context.Context, name string) (*aggregates.Healthcheck, error)
 	DeleteHealthcheck(ctx context.Context, id string) error
-	ListHealthchecks(ctx context.Context, regex *regexp.Regexp) ([]*aggregates.Healthcheck, error)
+	ListHealthchecks(ctx context.Context, query aggregates.Query) ([]*aggregates.Healthcheck, error)
 	CountHealthchecks(ctx context.Context) (int, error)
 }
 

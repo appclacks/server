@@ -1,6 +1,9 @@
 package aggregates
 
-import "time"
+import (
+	"regexp"
+	"time"
+)
 
 type Healthcheck struct {
 	ID          string
@@ -14,4 +17,9 @@ type Healthcheck struct {
 	Enabled     bool
 	CreatedAt   time.Time
 	Definition  HealthcheckDefinition
+}
+
+type Query struct {
+	Enabled *bool
+	Regex   *regexp.Regexp
 }

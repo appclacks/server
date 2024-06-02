@@ -14,18 +14,3 @@ create table if not exists healthcheck (
 --;;
 CREATE INDEX IF NOT EXISTS idx_healthcheck_type ON healthcheck(type);
 --;;
-create table if not exists healthcheck_result (
-  id uuid not null primary key,
-  success boolean not null,
-  labels jsonb,
-  created_at timestamp not null,
-  summary text not null,
-  message text not null,
-  healthcheck_id uuid not null,
-  foreign key (healthcheck_id) REFERENCES healthcheck(id)
-);
---;;
-CREATE INDEX IF NOT EXISTS idx_healthcheck_result_created_at ON healthcheck_result(created_at);
---;;
-CREATE INDEX IF NOT EXISTS idx_healthcheck_result_healthcheck_id ON healthcheck_result(healthcheck_id);
---;;

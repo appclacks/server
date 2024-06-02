@@ -106,7 +106,10 @@ func (b *Builder) ListHealthchecks(ec echo.Context) error {
 			return er.New("Invalid regex for the name-pattern parameter", er.BadRequest, true)
 		}
 	}
-	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context(), nameRegex)
+	query := aggregates.Query{
+		Regex: nameRegex,
+	}
+	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context(), query)
 	if err != nil {
 		return err
 	}
@@ -140,7 +143,9 @@ func (b *Builder) CabourotteDiscovery(ec echo.Context) error {
 			labels[kvSplitted[0]] = kvSplitted[1]
 		}
 	}
-	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context(), nil)
+	t := true
+	query := aggregates.Query{Enabled: &t}
+	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context(), query)
 	if err != nil {
 		return err
 	}

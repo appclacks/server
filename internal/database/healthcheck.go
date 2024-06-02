@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
@@ -157,9 +158,13 @@ func (c *Database) DeleteHealthcheck(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Database) ListHealthchecks(ctx context.Context) ([]*aggregates.Healthcheck, error) {
+func (c *Database) ListHealthchecks(ctx context.Context, enabled *bool) ([]*aggregates.Healthcheck, error) {
 	healthchecks := []Healthcheck{}
-	err := c.DB.SelectContext(ctx, &healthchecks, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck")
+	baseQuery := "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck"
+	if enabled != nil {
+		baseQuery = fmt.Sprintf("%s WHERE enabled is %t", baseQuery, *enabled)
+	}
+	err := c.DB.SelectContext(ctx, &healthchecks, baseQuery)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to list healthchecks")
 	}

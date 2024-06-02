@@ -3,7 +3,6 @@ package healthcheck
 import (
 	"context"
 	"math/rand"
-	"regexp"
 	"time"
 
 	"github.com/appclacks/server/internal/util"
@@ -98,18 +97,18 @@ func (s *Service) DeleteHealthcheck(ctx context.Context, id string) error {
 	return s.store.DeleteHealthcheck(ctx, id)
 }
 
-func (s *Service) ListHealthchecks(ctx context.Context, regex *regexp.Regexp) ([]*aggregates.Healthcheck, error) {
-	checks, err := s.store.ListHealthchecks(ctx)
+func (s *Service) ListHealthchecks(ctx context.Context, query aggregates.Query) ([]*aggregates.Healthcheck, error) {
+	checks, err := s.store.ListHealthchecks(ctx, query.Enabled)
 	if err != nil {
 		return nil, err
 	}
-	if regex == nil {
+	if query.Regex == nil {
 		return checks, nil
 	}
 	result := []*aggregates.Healthcheck{}
 	for i := range checks {
 		check := *checks[i]
-		if regex.MatchString(check.Name) {
+		if query.Regex.MatchString(check.Name) {
 			result = append(result, &check)
 		}
 	}

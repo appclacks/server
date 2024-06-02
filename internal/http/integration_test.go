@@ -255,13 +255,32 @@ func TestIntegration(t *testing.T) {
 	assert.Equal(t, dnsResult.ID, getByNameHealthcheckResult.ID)
 	assert.Equal(t, dnsResult.Name, getByNameHealthcheckResult.Name)
 
+	// cabourotte discovery with health check enabled
+
+	discoveryInput := client.CabourotteDiscoveryInput{}
+	discoveryCase := testCase{
+		url:            "/api/v1/cabourotte/discovery",
+		expectedStatus: 200,
+		payload:        discoveryInput,
+		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+
+	discoveryResult := client.CabourotteDiscoveryOutput{}
+	testHTTP(t, discoveryCase, &discoveryResult)
+
+	assert.Equal(t, 1, len(discoveryResult.DNSChecks))
+	assert.Equal(t, dnsResult.ID, discoveryResult.DNSChecks[0].ID)
+
 	// update
 
 	dnsUpdateInput := client.UpdateDNSHealthcheckInput{
 		Timeout:     "10s",
 		Name:        "dns2",
 		Description: "toto",
-		Enabled:     true,
+		Enabled:     false,
 		Labels: map[string]string{
 			"foo": "bar",
 		},
@@ -285,8 +304,26 @@ func TestIntegration(t *testing.T) {
 	testHTTP(t, updateDNSCase, &dnsResult)
 	assert.Equal(t, dnsResult.Name, dnsUpdateInput.Name)
 	assert.Equal(t, dnsResult.Timeout, dnsUpdateInput.Timeout)
-	assert.Equal(t, true, dnsResult.Enabled)
+	assert.Equal(t, false, dnsResult.Enabled)
 	assert.NotEqual(t, "", dnsResult.ID)
+
+	// cabourotte discovery with health check disabled
+
+	discoveryInput = client.CabourotteDiscoveryInput{}
+	discoveryCase = testCase{
+		url:            "/api/v1/cabourotte/discovery",
+		expectedStatus: 200,
+		payload:        discoveryInput,
+		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+
+	discoveryResult = client.CabourotteDiscoveryOutput{}
+	testHTTP(t, discoveryCase, &discoveryResult)
+
+	assert.Equal(t, 0, len(discoveryResult.DNSChecks))
 
 	// delete
 
