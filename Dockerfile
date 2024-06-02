@@ -21,4 +21,4 @@ COPY --from=build-env /app/server /app/server
 COPY ./dev/migrations /app/migrations
 
 ENTRYPOINT ["/app/server"]
-CMD ["server", "--config", "/config.yaml"]
+CMD ["server", "--config", "/app/config/config.yaml"]
