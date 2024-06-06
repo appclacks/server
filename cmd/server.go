@@ -12,16 +12,18 @@ import (
 	"github.com/appclacks/server/internal/http"
 	"github.com/appclacks/server/internal/http/handlers"
 	"github.com/appclacks/server/pkg/healthcheck"
+	"github.com/appclacks/server/pkg/pushgateway"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
-func buildServerCmd(logger *slog.Logger) *cobra.Command {
+func buildServerCmd() *cobra.Command {
 	serverCmd := &cobra.Command{
 		Use:   "server",
 		Short: "Runs the HTTP server",
 		Run: func(cmd *cobra.Command, args []string) {
+			logger := buildLogger(logLevel, logFormat)
 			err := runServer(logger)
 			if err != nil {
 				logger.Error(err.Error())
@@ -47,7 +49,8 @@ func runServer(logger *slog.Logger) error {
 		return err
 	}
 	healthcheckService := healthcheck.New(logger, store)
-	handlersBuilder := handlers.NewBuilder(healthcheckService)
+	pushgatewayService := pushgateway.New(store)
+	handlersBuilder := handlers.NewBuilder(healthcheckService, pushgatewayService)
 	server, err := http.NewServer(logger, config.HTTP, prometheus.DefaultRegisterer.(*prometheus.Registry), handlersBuilder)
 	if err != nil {
 		return err

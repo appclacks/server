@@ -15,6 +15,7 @@ import (
 	"github.com/appclacks/server/internal/validator"
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
+	er "github.com/mcorbin/corbierror"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -31,8 +32,7 @@ type CustomValidator struct {
 
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := validator.Validator.Struct(i); err != nil {
-		// Optionally, you could return the error to give each route more control over the status code
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return er.Newf("invalid parameters: %s", er.BadRequest, true, err.Error())
 	}
 	return nil
 }
@@ -119,6 +119,10 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 	apiGroup.GET("/healthcheck/:identifier", builder.GetHealthcheck)
 	apiGroup.GET("/healthcheck", builder.ListHealthchecks)
 	apiGroup.GET("/cabourotte/discovery", builder.CabourotteDiscovery)
+	apiGroup.POST("/pushgateway", builder.CreateOrUpdatePushgatewayMetric)
+	apiGroup.DELETE("/pushgateway", builder.DeleteMetric)
+	apiGroup.GET("/pushgateway", builder.ListPushgatewayMetrics)
+	apiGroup.GET("/pushgateway/prometheus/metrics", builder.PushgatewayMetrics)
 
 	return &Server{
 		server: e,

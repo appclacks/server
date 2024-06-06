@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
+	pgaggregates "github.com/appclacks/server/pkg/pushgateway/aggregates"
 )
 
 type HealthcheckService interface {
@@ -16,12 +17,22 @@ type HealthcheckService interface {
 	CountHealthchecks(ctx context.Context) (int, error)
 }
 
-type Builder struct {
-	healthcheck HealthcheckService
+type PushgatewayService interface {
+	CreateOrUpdatePushgatewayMetric(ctx context.Context, metric pgaggregates.PushgatewayMetric, cumulative bool) (string, error)
+	GetMetrics(ctx context.Context) ([]*pgaggregates.PushgatewayMetric, error)
+	DeleteMetricsByName(ctx context.Context, name string) error
+	DeleteMetricByID(ctx context.Context, id string) error
+	PrometheusMetrics(ctx context.Context) (string, error)
 }
 
-func NewBuilder(healthcheck HealthcheckService) *Builder {
+type Builder struct {
+	healthcheck HealthcheckService
+	pushgateway PushgatewayService
+}
+
+func NewBuilder(healthcheck HealthcheckService, pushgateway PushgatewayService) *Builder {
 	return &Builder{
 		healthcheck: healthcheck,
+		pushgateway: pushgateway,
 	}
 }

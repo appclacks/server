@@ -5,7 +5,6 @@ import (
 	"regexp"
 
 	"github.com/appclacks/go-client"
-	"github.com/appclacks/server/internal/validator"
 	"github.com/appclacks/server/pkg/healthcheck"
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
 	"github.com/labstack/echo/v4"
@@ -17,7 +16,7 @@ func (b *Builder) CreateHTTPHealthcheck(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 
@@ -85,7 +84,7 @@ func (b *Builder) UpdateHTTPHealthcheck(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 	for _, r := range payload.BodyRegexp {

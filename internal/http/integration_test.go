@@ -20,6 +20,7 @@ import (
 	apihttp "github.com/appclacks/server/internal/http"
 	"github.com/appclacks/server/internal/http/handlers"
 	"github.com/appclacks/server/pkg/healthcheck"
+	"github.com/appclacks/server/pkg/pushgateway"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 )
@@ -142,8 +143,9 @@ func TestIntegration(t *testing.T) {
 	logger := slog.Default()
 	store, err := database.New(logger, config.Database, config.Healthchecks.Probers)
 	healthcheckService := healthcheck.New(logger, store)
+	pushgatewayService := pushgateway.New(store)
 	assert.NoError(t, err)
-	handlersBuilder := handlers.NewBuilder(healthcheckService)
+	handlersBuilder := handlers.NewBuilder(healthcheckService, pushgatewayService)
 	server, err := apihttp.NewServer(logger, config.HTTP, reg, handlersBuilder)
 	assert.NoError(t, err)
 	_, err = store.Exec("truncate healthcheck cascade;")
@@ -152,6 +154,11 @@ func TestIntegration(t *testing.T) {
 	err = server.Start()
 	assert.NoError(t, err)
 	time.Sleep(1 * time.Second)
+
+	for _, query := range database.CleanupQueries {
+		_, err := store.DB.Exec(query)
+		assert.NoError(t, err)
+	}
 
 	// healthchecks
 
@@ -621,6 +628,178 @@ func TestIntegration(t *testing.T) {
 	}
 	testHTTP(t, getHealthcheckCase, nil)
 
+	// pushgateway
+
+	// create
+
+	pushgatewayMetricInput := client.CreateOrUpdatePushgatewayMetricInput{
+		Name:        "metric1",
+		Description: "hello",
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		TTL:   "200s",
+		Type:  "counter",
+		Value: 100.1,
+	}
+
+	createPushgatewayMetricCase := testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload:        pushgatewayMetricInput,
+		method:         "POST",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	testHTTP(t, createPushgatewayMetricCase, nil)
+
+	// list
+
+	listMetricsCase := testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload:        dnsInput,
+		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+
+	listMetricsResult := client.ListPushgatewayMetricsOutput{}
+	testHTTP(t, listMetricsCase, &listMetricsResult)
+	assert.Len(t, listMetricsResult.Result, 1)
+	firstMetric := listMetricsResult.Result[0]
+	assert.NotEqual(t, firstMetric.ID, "")
+	assert.Equal(t, pushgatewayMetricInput.Name, firstMetric.Name)
+	assert.Equal(t, pushgatewayMetricInput.Description, firstMetric.Description)
+	assert.Equal(t, pushgatewayMetricInput.Labels, firstMetric.Labels)
+	assert.Equal(t, pushgatewayMetricInput.TTL, firstMetric.TTL)
+	assert.Equal(t, pushgatewayMetricInput.Type, firstMetric.Type)
+	assert.Equal(t, pushgatewayMetricInput.Value, firstMetric.Value)
+	assert.True(t, firstMetric.ExpiresAt.After(time.Now().Add(190*time.Second)))
+	assert.True(t, firstMetric.ExpiresAt.Before(time.Now().Add(210*time.Second)))
+
+	// create two new metrics
+
+	pushgatewayMetricInputNewLabel := client.CreateOrUpdatePushgatewayMetricInput{
+		Name:        "metric1",
+		Description: "hello",
+		Labels: map[string]string{
+			"foo": "baz",
+		},
+		TTL:   "200s",
+		Type:  "counter",
+		Value: 100.1,
+	}
+
+	createPushgatewayMetricNewLabelCase := testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload:        pushgatewayMetricInputNewLabel,
+		method:         "POST",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	testHTTP(t, createPushgatewayMetricNewLabelCase, nil)
+
+	pushgatewayMetricInputNewName := client.CreateOrUpdatePushgatewayMetricInput{
+		Name:        "metric2",
+		Description: "hello",
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		TTL:   "200s",
+		Type:  "counter",
+		Value: 100.1,
+	}
+
+	createPushgatewayMetricNewName := testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload:        pushgatewayMetricInputNewName,
+		method:         "POST",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	testHTTP(t, createPushgatewayMetricNewName, nil)
+
+	// list again metrics
+
+	listMetricsSecondCase := testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload:        dnsInput,
+		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+
+	listMetricsResult = client.ListPushgatewayMetricsOutput{}
+	testHTTP(t, listMetricsSecondCase, &listMetricsResult)
+	assert.Len(t, listMetricsResult.Result, 3)
+
+	// delete 2 first metrics by name
+
+	DeletePushgatewayMetrics := testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload: client.DeletePushgatewayMetricInput{
+			Identifier: pushgatewayMetricInput.Name,
+		},
+		method: "DELETE",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	testHTTP(t, DeletePushgatewayMetrics, nil)
+
+	// list to count the remainings
+
+	listMetricsResult = client.ListPushgatewayMetricsOutput{}
+	testHTTP(t, testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload:        dnsInput,
+		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}, &listMetricsResult)
+	assert.Len(t, listMetricsResult.Result, 1)
+
+	// delete by ID
+
+	DeletePushgatewayMetrics = testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload: client.DeletePushgatewayMetricInput{
+			Identifier: listMetricsResult.Result[0].ID,
+		},
+		method: "DELETE",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}
+	testHTTP(t, DeletePushgatewayMetrics, nil)
+
+	// list to count, should be zero
+
+	listMetricsResult = client.ListPushgatewayMetricsOutput{}
+	testHTTP(t, testCase{
+		url:            "/api/v1/pushgateway",
+		expectedStatus: 200,
+		payload:        dnsInput,
+		method:         "GET",
+		headers: map[string]string{
+			"Authorization": basicAuth(testUser, testPassword),
+		},
+	}, &listMetricsResult)
+	assert.Len(t, listMetricsResult.Result, 0)
+
 	cases := []testCase{
 		{
 			url:            "/healthz",
@@ -681,6 +860,7 @@ func TestIntegration(t *testing.T) {
 			url:            "/api/v1/healthcheck",
 			expectedStatus: 401,
 			method:         "GET",
+			body:           "Unauthorized",
 			headers: map[string]string{
 				"Authorization": basicAuth("invalid_user", testPassword),
 			},
@@ -690,6 +870,15 @@ func TestIntegration(t *testing.T) {
 			expectedStatus: 404,
 			body:           "healthcheck not found",
 			method:         "GET",
+			headers: map[string]string{
+				"Authorization": basicAuth(testUser, testPassword),
+			},
+		},
+		{
+			url:            "/api/v1/pushgateway",
+			expectedStatus: 400,
+			body:           "Field validation for",
+			method:         "DELETE",
 			headers: map[string]string{
 				"Authorization": basicAuth(testUser, testPassword),
 			},

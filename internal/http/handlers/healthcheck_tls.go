@@ -8,7 +8,6 @@ import (
 	er "github.com/mcorbin/corbierror"
 
 	client "github.com/appclacks/go-client"
-	"github.com/appclacks/server/internal/validator"
 	"github.com/appclacks/server/pkg/healthcheck"
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
 )
@@ -18,11 +17,7 @@ func (b *Builder) CreateTLSHealthcheck(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
-		return err
-	}
-
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 
@@ -88,11 +83,7 @@ func (b *Builder) UpdateTLSHealthcheck(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
-		return err
-	}
-
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 

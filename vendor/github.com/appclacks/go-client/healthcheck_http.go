@@ -1,5 +1,11 @@
 package client
 
+import (
+	"context"
+	"fmt"
+	"net/http"
+)
+
 type HealthcheckHTTPDefinition struct {
 	ValidStatus []uint            `json:"valid-status" validate:"required,min=1,max=20,dive,max=1000"`
 	Target      string            `json:"target" validate:"required,max=255,min=1"`
@@ -39,4 +45,34 @@ type UpdateHTTPHealthcheckInput struct {
 	Enabled     bool              `json:"enabled" description:"Enable the healthcheck on the appclacks platform"`
 	Timeout     string            `json:"timeout" validate:"required"`
 	HealthcheckHTTPDefinition
+}
+
+func (c *Client) CreateHTTPHealthcheck(ctx context.Context, input CreateHTTPHealthcheckInput) (Healthcheck, error) {
+	var result Healthcheck
+	_, err := c.sendRequest(ctx, "/api/v1/healthcheck/http", http.MethodPost, input, &result, nil)
+	if err != nil {
+		return Healthcheck{}, err
+	}
+	return result, nil
+}
+
+func (c *Client) UpdateHTTPHealthcheck(ctx context.Context, input UpdateHTTPHealthcheckInput) (Healthcheck, error) {
+	var result Healthcheck
+	internalInput := internalUpdateHealthcheckInput{
+		Name:        input.Name,
+		Description: input.Description,
+		Labels:      input.Labels,
+		Interval:    input.Interval,
+		Enabled:     input.Enabled,
+		Timeout:     input.Timeout,
+	}
+	payload, err := jsonMerge(internalInput, input.HealthcheckHTTPDefinition)
+	if err != nil {
+		return result, err
+	}
+	_, err = c.sendRequest(ctx, fmt.Sprintf("/api/v1/healthcheck/http/%s", input.ID), http.MethodPut, payload, &result, nil)
+	if err != nil {
+		return Healthcheck{}, err
+	}
+	return result, nil
 }
