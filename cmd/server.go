@@ -48,10 +48,14 @@ func runServer(logger *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	registry := prometheus.DefaultRegisterer.(*prometheus.Registry)
 	healthcheckService := healthcheck.New(logger, store)
-	pushgatewayService := pushgateway.New(store)
+	pushgatewayService, err := pushgateway.New(logger, store, registry)
+	if err != nil {
+		return err
+	}
 	handlersBuilder := handlers.NewBuilder(healthcheckService, pushgatewayService)
-	server, err := http.NewServer(logger, config.HTTP, prometheus.DefaultRegisterer.(*prometheus.Registry), handlersBuilder)
+	server, err := http.NewServer(logger, config.HTTP, registry, handlersBuilder)
 	if err != nil {
 		return err
 	}
@@ -67,12 +71,14 @@ func runServer(logger *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	pushgatewayService.Start()
 	go func() {
 		for sig := range signals {
 			switch sig {
 			case syscall.SIGINT, syscall.SIGTERM:
 				logger.Info(fmt.Sprintf("received signal %s, starting shutdown", sig))
 				signal.Stop(signals)
+				pushgatewayService.Stop()
 				err := server.Stop()
 				if err != nil {
 					errChan <- err

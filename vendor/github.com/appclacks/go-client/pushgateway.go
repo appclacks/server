@@ -19,7 +19,7 @@ type CreateOrUpdatePushgatewayMetricInput struct {
 	Description string            `json:"description,omitempty"`
 	Labels      map[string]string `json:"labels" description:"Healthcheck labels" validate:"dive,keys,max=255,min=1,endkeys,max=255,min=1"`
 	TTL         string            `json:"ttl"`
-	Type        string            `json:"type" validate:"oneof=counter gauge histogram summary"`
+	Type        string            `json:"type" validate:"omitempty,oneof=counter gauge histogram summary"`
 	Value       float32           `json:"value" validate:"required"`
 }
 

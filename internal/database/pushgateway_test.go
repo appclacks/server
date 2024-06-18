@@ -2,6 +2,7 @@ package database_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -156,5 +157,27 @@ func TestPushgatewayCRUD(t *testing.T) {
 	assert.Len(t, metric, 1)
 	err = TestComponent.DeleteMetricsByName(context.Background(), "test4")
 	assert.ErrorContains(t, err, "no metric were deleted")
+
+	// cleanup
+
+	now := time.Now().UTC()
+	for i := 0; i < 10; i++ {
+		expiresAt := now
+		if i > 4 {
+			expiresAt = now.Add(300 * time.Second)
+		}
+		def1 := aggregates.PushgatewayMetric{
+			Name:      fmt.Sprintf("test%d", i),
+			TTL:       &ttl1,
+			CreatedAt: now1,
+			ExpiresAt: &expiresAt,
+			Value:     1000,
+		}
+		_, err := TestComponent.CreateOrUpdatePushgatewayMetric(context.Background(), def1, false)
+		assert.NoError(t, err)
+	}
+	deleteCount, err := TestComponent.CleanPushgatewayMetrics(context.Background())
+	assert.NoError(t, err)
+	assert.Equal(t, int64(5), deleteCount)
 
 }

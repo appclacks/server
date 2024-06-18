@@ -142,8 +142,9 @@ func TestIntegration(t *testing.T) {
 	}
 	logger := slog.Default()
 	store, err := database.New(logger, config.Database, config.Healthchecks.Probers)
+	assert.NoError(t, err)
 	healthcheckService := healthcheck.New(logger, store)
-	pushgatewayService := pushgateway.New(store)
+	pushgatewayService, err := pushgateway.New(logger, store, reg)
 	assert.NoError(t, err)
 	handlersBuilder := handlers.NewBuilder(healthcheckService, pushgatewayService)
 	server, err := apihttp.NewServer(logger, config.HTTP, reg, handlersBuilder)

@@ -49,17 +49,18 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 	respCounter := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "http_responses_total",
-			Help: "Count the number of HTTP responses.",
+			Help: "Count the number of HTTP responses",
 		},
 		[]string{"method", "status", "path"})
 
-	buckets := []float64{
-		0.05, 0.1, 0.2, 0.4, 0.8, 1,
-		1.5, 2, 3, 5}
 	err = registry.Register(respCounter)
 	if err != nil {
 		return nil, err
 	}
+
+	buckets := []float64{
+		0.05, 0.1, 0.2, 0.4, 0.8, 1,
+		1.5, 2, 3, 5}
 
 	reqHistogram := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{

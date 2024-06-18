@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/appclacks/server/pkg/pushgateway/aggregates"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func InitPushgatewayMetric(metric *aggregates.PushgatewayMetric) {
@@ -14,6 +15,7 @@ func InitPushgatewayMetric(metric *aggregates.PushgatewayMetric) {
 }
 
 func (s *Service) CreateOrUpdatePushgatewayMetric(ctx context.Context, metric aggregates.PushgatewayMetric, cumulative bool) (string, error) {
+	s.logger.Debug(fmt.Sprintf("creating or updating metric %s", metric.Name))
 	return s.store.CreateOrUpdatePushgatewayMetric(ctx, metric, cumulative)
 }
 
@@ -52,9 +54,22 @@ func (s *Service) PrometheusMetrics(ctx context.Context) (string, error) {
 }
 
 func (s *Service) DeleteMetricsByName(ctx context.Context, name string) error {
+	s.logger.Debug(fmt.Sprintf("deleting push gateway metric %s", name))
 	return s.store.DeleteMetricsByName(ctx, name)
 }
 
 func (s *Service) DeleteMetricByID(ctx context.Context, id string) error {
+	s.logger.Debug(fmt.Sprintf("deleting push gateway metric %s", id))
 	return s.store.DeleteMetricByID(ctx, id)
+}
+
+func (s *Service) CleanPushgatewayMetrics(ctx context.Context) {
+	numberMetricsDeleted, err := s.store.CleanPushgatewayMetrics(ctx)
+	if err != nil {
+		s.logger.Error(fmt.Sprintf("fail to clean push gateway metrics: %s", err.Error()))
+		s.pushgatewayExecutionsCounter.With(prometheus.Labels{"status": "failure"}).Inc()
+	} else {
+		s.logger.Debug(fmt.Sprintf("%d push gateway metrics cleaned", numberMetricsDeleted))
+		s.pushgatewayExecutionsCounter.With(prometheus.Labels{"status": "success"}).Inc()
+	}
 }

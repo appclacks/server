@@ -173,3 +173,15 @@ func (c *Database) DeleteMetricByID(ctx context.Context, id string) error {
 	}
 	return checkResult(result, 1)
 }
+
+func (c *Database) CleanPushgatewayMetrics(ctx context.Context) (int64, error) {
+	result, err := c.DB.ExecContext(ctx, "DELETE FROM pushgateway_metric WHERE expires_at < $1", time.Now().UTC())
+	if err != nil {
+		return 0, fmt.Errorf("fail to clean metric: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("fail to check affected row: %w", err)
+	}
+	return affected, nil
+}
