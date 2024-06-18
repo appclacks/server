@@ -48,7 +48,7 @@ func toPushGatewayMetric(metric *pushgatewayMetric) (*aggregates.PushgatewayMetr
 
 func (c *Database) CreateOrUpdatePushgatewayMetric(ctx context.Context, metric aggregates.PushgatewayMetric, cumulative bool) (string, error) {
 	metricID := ""
-	tx := c.DB.MustBegin()
+	tx := c.db.MustBegin()
 	shouldRollback := true
 	defer func() {
 		if shouldRollback {
@@ -72,7 +72,7 @@ func (c *Database) CreateOrUpdatePushgatewayMetric(ctx context.Context, metric a
 		}
 		labelCondition = *labelString
 	}
-	err = c.DB.GetContext(ctx, &currentMetric, "SELECT id, name, value FROM pushgateway_metric WHERE name=$1 AND labels @> $2 AND $2 <@ labels", metric.Name, labelCondition)
+	err = c.db.GetContext(ctx, &currentMetric, "SELECT id, name, value FROM pushgateway_metric WHERE name=$1 AND labels @> $2 AND $2 <@ labels", metric.Name, labelCondition)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			return "", err
@@ -116,7 +116,7 @@ func (c *Database) CreateOrUpdatePushgatewayMetric(ctx context.Context, metric a
 			Value:       metricValue,
 		}
 		c.Logger.Debug(fmt.Sprintf("updating metric %s", metric.Name))
-		result, err := c.DB.NamedExecContext(ctx, "UPDATE pushgateway_metric SET description=:description, ttl=:ttl, type=:type, created_at=:created_at, expires_at=:expires_at, value=:value where id=:id", updatedMetric)
+		result, err := c.db.NamedExecContext(ctx, "UPDATE pushgateway_metric SET description=:description, ttl=:ttl, type=:type, created_at=:created_at, expires_at=:expires_at, value=:value where id=:id", updatedMetric)
 		if err != nil {
 			return "", err
 		}
@@ -135,7 +135,7 @@ func (c *Database) CreateOrUpdatePushgatewayMetric(ctx context.Context, metric a
 
 func (c *Database) GetMetrics(ctx context.Context) ([]*aggregates.PushgatewayMetric, error) {
 	metrics := []pushgatewayMetric{}
-	err := c.DB.SelectContext(ctx, &metrics, "SELECT id, name, description, ttl, labels, value, type, created_at, expires_at FROM pushgateway_metric")
+	err := c.db.SelectContext(ctx, &metrics, "SELECT id, name, description, ttl, labels, value, type, created_at, expires_at FROM pushgateway_metric")
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (c *Database) GetMetrics(ctx context.Context) ([]*aggregates.PushgatewayMet
 }
 
 func (c *Database) DeleteMetricsByName(ctx context.Context, name string) error {
-	result, err := c.DB.ExecContext(ctx, "DELETE FROM pushgateway_metric WHERE name=$1", name)
+	result, err := c.db.ExecContext(ctx, "DELETE FROM pushgateway_metric WHERE name=$1", name)
 	if err != nil {
 		return fmt.Errorf("fail to delete metrics: %w", err)
 	}
@@ -167,7 +167,7 @@ func (c *Database) DeleteMetricsByName(ctx context.Context, name string) error {
 }
 
 func (c *Database) DeleteMetricByID(ctx context.Context, id string) error {
-	result, err := c.DB.ExecContext(ctx, "DELETE FROM pushgateway_metric WHERE id=$1", id)
+	result, err := c.db.ExecContext(ctx, "DELETE FROM pushgateway_metric WHERE id=$1", id)
 	if err != nil {
 		return fmt.Errorf("fail to delete metric: %w", err)
 	}
@@ -175,7 +175,7 @@ func (c *Database) DeleteMetricByID(ctx context.Context, id string) error {
 }
 
 func (c *Database) CleanPushgatewayMetrics(ctx context.Context) (int64, error) {
-	result, err := c.DB.ExecContext(ctx, "DELETE FROM pushgateway_metric WHERE expires_at < $1", time.Now().UTC())
+	result, err := c.db.ExecContext(ctx, "DELETE FROM pushgateway_metric WHERE expires_at < $1", time.Now().UTC())
 	if err != nil {
 		return 0, fmt.Errorf("fail to clean metric: %w", err)
 	}

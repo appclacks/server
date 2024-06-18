@@ -13,6 +13,7 @@ import (
 	"github.com/appclacks/server/internal/http/handlers"
 	"github.com/appclacks/server/pkg/healthcheck"
 	"github.com/appclacks/server/pkg/pushgateway"
+	"github.com/appclacks/server/pkg/slo"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -50,11 +51,12 @@ func runServer(logger *slog.Logger) error {
 	}
 	registry := prometheus.DefaultRegisterer.(*prometheus.Registry)
 	healthcheckService := healthcheck.New(logger, store)
+	sloService := slo.New(logger, store)
 	pushgatewayService, err := pushgateway.New(logger, store, registry)
 	if err != nil {
 		return err
 	}
-	handlersBuilder := handlers.NewBuilder(healthcheckService, pushgatewayService)
+	handlersBuilder := handlers.NewBuilder(healthcheckService, pushgatewayService, sloService)
 	server, err := http.NewServer(logger, config.HTTP, registry, handlersBuilder)
 	if err != nil {
 		return err

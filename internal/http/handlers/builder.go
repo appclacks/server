@@ -5,6 +5,7 @@ import (
 
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
 	pgaggregates "github.com/appclacks/server/pkg/pushgateway/aggregates"
+	sloaggregates "github.com/appclacks/server/pkg/slo/aggregates"
 )
 
 type HealthcheckService interface {
@@ -25,14 +26,21 @@ type PushgatewayService interface {
 	PrometheusMetrics(ctx context.Context) (string, error)
 }
 
+type SLOService interface {
+	AddRecord(ctx context.Context, record sloaggregates.Record) error
+	Metrics(ctx context.Context) error
+}
+
 type Builder struct {
 	healthcheck HealthcheckService
 	pushgateway PushgatewayService
+	slo         SLOService
 }
 
-func NewBuilder(healthcheck HealthcheckService, pushgateway PushgatewayService) *Builder {
+func NewBuilder(healthcheck HealthcheckService, pushgateway PushgatewayService, slo SLOService) *Builder {
 	return &Builder{
 		healthcheck: healthcheck,
 		pushgateway: pushgateway,
+		slo:         slo,
 	}
 }

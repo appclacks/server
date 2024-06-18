@@ -124,6 +124,8 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 	apiGroup.DELETE("/pushgateway", builder.DeleteMetric)
 	apiGroup.GET("/pushgateway", builder.ListPushgatewayMetrics)
 	apiGroup.GET("/pushgateway/prometheus/metrics", builder.PushgatewayMetrics)
+	apiGroup.POST("/slo", builder.AddSLORecord)
+	apiGroup.GET("/slo", builder.SLOMetrics)
 
 	return &Server{
 		server: e,
