@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/appclacks/go-client"
-	"github.com/appclacks/server/internal/validator"
 	"github.com/appclacks/server/pkg/healthcheck"
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
 	"github.com/google/uuid"
@@ -20,7 +19,7 @@ func (b *Builder) DeleteHealthcheck(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 
@@ -63,7 +62,7 @@ func (b *Builder) GetHealthcheck(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 
@@ -94,7 +93,7 @@ func (b *Builder) ListHealthchecks(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 
@@ -125,7 +124,7 @@ func (b *Builder) CabourotteDiscovery(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 

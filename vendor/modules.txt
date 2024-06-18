@@ -1,4 +1,4 @@
-# github.com/appclacks/go-client v0.0.0-20240601153604-3e5f27cc6056
+# github.com/appclacks/go-client v0.0.0-20240616203643-c8ce02eb386d
 ## explicit; go 1.22.0
 github.com/appclacks/go-client
 # github.com/baidubce/bce-sdk-go v0.9.182
@@ -89,7 +89,6 @@ github.com/mattn/go-isatty
 github.com/mcorbin/corbierror
 # github.com/pkg/errors v0.9.1
 ## explicit
-github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib

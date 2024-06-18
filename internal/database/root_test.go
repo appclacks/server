@@ -1,12 +1,12 @@
 package database_test
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"testing"
 
 	"github.com/appclacks/server/internal/database"
-	"github.com/pkg/errors"
 )
 
 var TestComponent *database.Database
@@ -42,14 +42,11 @@ func InitTestDB(logger *slog.Logger) *database.Database {
 }
 
 func cleanup(c *database.Database) error {
-	queries := []string{
-		"TRUNCATE healthcheck CASCADE",
-		"TRUNCATE schema_migrations CASCADE",
-	}
-	for _, query := range queries {
+
+	for _, query := range database.CleanupQueries {
 		_, err := c.DB.Exec(query)
 		if err != nil {
-			return errors.Wrapf(err, "fail to clean DB on query %s", query)
+			return fmt.Errorf("fail to clean DB on query %s: %w", query, err)
 		}
 	}
 	return nil

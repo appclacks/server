@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/appclacks/go-client"
-	"github.com/appclacks/server/internal/validator"
 	"github.com/appclacks/server/pkg/healthcheck"
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
 	"github.com/labstack/echo/v4"
@@ -15,7 +14,7 @@ func (b *Builder) CreateDNSHealthcheck(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 	check := &aggregates.Healthcheck{
@@ -59,7 +58,7 @@ func (b *Builder) UpdateDNSHealthcheck(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
-	if err := validator.Validator.Struct(payload); err != nil {
+	if err := ec.Validate(payload); err != nil {
 		return err
 	}
 

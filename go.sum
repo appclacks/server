@@ -6,6 +6,14 @@ github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migc
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
 github.com/appclacks/go-client v0.0.0-20240601153604-3e5f27cc6056 h1:Iz5NtXS/BjLzgkVqYAB7/TYyskrJ66y6/vVj8HD+nKE=
 github.com/appclacks/go-client v0.0.0-20240601153604-3e5f27cc6056/go.mod h1:ZOQEaU5H5BTLZr326dMjvVbB+pdkeRX3emyu4cEq9GU=
+github.com/appclacks/go-client v0.0.0-20240610183348-ab8dfe4619e9 h1:gEo4/IUpmViyOXz4PRCE9sVtNHIUtsJM6IiYhJ8p3bU=
+github.com/appclacks/go-client v0.0.0-20240610183348-ab8dfe4619e9/go.mod h1:ZOQEaU5H5BTLZr326dMjvVbB+pdkeRX3emyu4cEq9GU=
+github.com/appclacks/go-client v0.0.0-20240612211353-ca705a8ef159 h1:uf+OKgnq0e2rm7ssddZ1I3NFNmQyJBHo35qd7+G5AWg=
+github.com/appclacks/go-client v0.0.0-20240612211353-ca705a8ef159/go.mod h1:ZOQEaU5H5BTLZr326dMjvVbB+pdkeRX3emyu4cEq9GU=
+github.com/appclacks/go-client v0.0.0-20240615165525-db218ab6cbc8 h1:DXAwhDr62DChJfIILXcNqDNO5KDECv09oUP++UC22IY=
+github.com/appclacks/go-client v0.0.0-20240615165525-db218ab6cbc8/go.mod h1:ZOQEaU5H5BTLZr326dMjvVbB+pdkeRX3emyu4cEq9GU=
+github.com/appclacks/go-client v0.0.0-20240616203643-c8ce02eb386d h1:xNugXlR+pcLY4d3zuYQ4qzm/e68A+roY1HnquwBgiR8=
+github.com/appclacks/go-client v0.0.0-20240616203643-c8ce02eb386d/go.mod h1:ZOQEaU5H5BTLZr326dMjvVbB+pdkeRX3emyu4cEq9GU=
 github.com/baidubce/bce-sdk-go v0.9.182 h1:DUNNEzQh5Gk198izzjt39L/HlURbltTK4nBzNfEn6HQ=
 github.com/baidubce/bce-sdk-go v0.9.182/go.mod h1:zbYJMQwE4IZuyrJiFO8tO8NbtYiKTFTbwh4eIsqjVdg=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
