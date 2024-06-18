@@ -44,7 +44,7 @@ func InitTestDB(logger *slog.Logger) *database.Database {
 func cleanup(c *database.Database) error {
 
 	for _, query := range database.CleanupQueries {
-		_, err := c.DB.Exec(query)
+		_, err := c.Exec(query)
 		if err != nil {
 			return fmt.Errorf("fail to clean DB on query %s: %w", query, err)
 		}

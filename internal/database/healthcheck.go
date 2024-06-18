@@ -51,7 +51,7 @@ func toHealthcheck(healthcheck *dbHealthcheck) (*aggregates.Healthcheck, error) 
 
 func (c *Database) CreateHealthcheck(ctx context.Context, healthcheck *aggregates.Healthcheck) error {
 	checkExists := dbHealthcheck{}
-	tx := c.DB.MustBegin()
+	tx := c.db.MustBegin()
 	shouldRollback := true
 	defer func() {
 		if shouldRollback {
@@ -112,7 +112,7 @@ func (c *Database) CreateHealthcheck(ctx context.Context, healthcheck *aggregate
 
 func (c *Database) GetHealthcheck(ctx context.Context, id string) (*aggregates.Healthcheck, error) {
 	healthcheck := dbHealthcheck{}
-	err := c.DB.GetContext(ctx, &healthcheck, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE id=$1", id)
+	err := c.db.GetContext(ctx, &healthcheck, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE id=$1", id)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			return nil, fmt.Errorf("fail to get healthcheck %s: %w", id, err)
@@ -129,7 +129,7 @@ func (c *Database) GetHealthcheck(ctx context.Context, id string) (*aggregates.H
 
 func (c *Database) GetHealthcheckByName(ctx context.Context, name string) (*aggregates.Healthcheck, error) {
 	healthcheck := dbHealthcheck{}
-	err := c.DB.GetContext(ctx, &healthcheck, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE name=$1", name)
+	err := c.db.GetContext(ctx, &healthcheck, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE name=$1", name)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			return nil, fmt.Errorf("fail to get healthcheck %s: %w", name, err)
@@ -145,7 +145,7 @@ func (c *Database) DeleteHealthcheck(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	result, err := c.DB.ExecContext(ctx, "DELETE FROM healthcheck WHERE id=$1", id)
+	result, err := c.db.ExecContext(ctx, "DELETE FROM healthcheck WHERE id=$1", id)
 	if err != nil {
 		return fmt.Errorf("fail to delete healthcheck: %w", err)
 	}
@@ -162,7 +162,7 @@ func (c *Database) ListHealthchecks(ctx context.Context, enabled *bool) ([]*aggr
 	if enabled != nil {
 		baseQuery = fmt.Sprintf("%s WHERE enabled is %t", baseQuery, *enabled)
 	}
-	err := c.DB.SelectContext(ctx, &healthchecks, baseQuery)
+	err := c.db.SelectContext(ctx, &healthchecks, baseQuery)
 	if err != nil {
 		return nil, fmt.Errorf("fail to list healthchecks: %w", err)
 	}
@@ -181,7 +181,7 @@ func (c *Database) ListHealthchecks(ctx context.Context, enabled *bool) ([]*aggr
 
 func (c *Database) ListHealthchecksForProber(ctx context.Context, prober int) ([]*aggregates.Healthcheck, error) {
 	healthchecks := []dbHealthcheck{}
-	err := c.DB.SelectContext(ctx, &healthchecks, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE healthcheck.random_id%$1=$2 AND healthcheck.enabled=true", c.probers, prober)
+	err := c.db.SelectContext(ctx, &healthchecks, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE healthcheck.random_id%$1=$2 AND healthcheck.enabled=true", c.probers, prober)
 	if err != nil {
 		return nil, fmt.Errorf("fail to list healthchecks: %w", err)
 	}
@@ -199,7 +199,7 @@ func (c *Database) ListHealthchecksForProber(ctx context.Context, prober int) ([
 }
 
 func (c *Database) UpdateHealthcheck(ctx context.Context, update *aggregates.Healthcheck) error {
-	tx := c.DB.MustBegin()
+	tx := c.db.MustBegin()
 	shouldRollback := true
 	defer func() {
 		if shouldRollback {
@@ -242,7 +242,7 @@ func (c *Database) UpdateHealthcheck(ctx context.Context, update *aggregates.Hea
 		Enabled:     update.Enabled,
 		Definition:  def,
 	}
-	result, err := c.DB.NamedExecContext(ctx, "update healthcheck set name=:name, description=:description, labels=:labels, definition=:definition, interval=:interval, enabled=:enabled, timeout=:timeout where id=:id", dbHealthcheck)
+	result, err := c.db.NamedExecContext(ctx, "update healthcheck set name=:name, description=:description, labels=:labels, definition=:definition, interval=:interval, enabled=:enabled, timeout=:timeout where id=:id", dbHealthcheck)
 	if err != nil {
 		return fmt.Errorf("fail to update healthcheck %s: %w", update.ID, err)
 	}
@@ -260,7 +260,7 @@ func (c *Database) UpdateHealthcheck(ctx context.Context, update *aggregates.Hea
 
 func (c *Database) CountHealthchecks(ctx context.Context) (int, error) {
 	var count int
-	row := c.DB.QueryRowContext(ctx, "SELECT COUNT(*) FROM healthcheck")
+	row := c.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM healthcheck")
 	err := row.Scan(&count)
 	if err != nil {
 		return 0, err

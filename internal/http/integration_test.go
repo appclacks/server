@@ -157,7 +157,7 @@ func TestIntegration(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	for _, query := range database.CleanupQueries {
-		_, err := store.DB.Exec(query)
+		_, err := store.Exec(query)
 		assert.NoError(t, err)
 	}
 

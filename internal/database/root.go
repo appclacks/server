@@ -17,7 +17,7 @@ import (
 )
 
 type Database struct {
-	DB      *sqlx.DB
+	db      *sqlx.DB
 	Logger  *slog.Logger
 	probers uint
 }
@@ -29,7 +29,7 @@ var CleanupQueries = []string{
 }
 
 func (d *Database) Exec(query string) (sql.Result, error) {
-	return d.DB.Exec(query)
+	return d.db.Exec(query)
 }
 
 func New(logger *slog.Logger, config Configuration, probers uint) (*Database, error) {
@@ -63,7 +63,7 @@ func New(logger *slog.Logger, config Configuration, probers uint) (*Database, er
 	}
 	logger.Info("Migrations applied")
 	return &Database{
-		DB:      db,
+		db:      db,
 		Logger:  logger,
 		probers: probers,
 	}, nil
