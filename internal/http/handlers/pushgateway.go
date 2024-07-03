@@ -109,7 +109,7 @@ func (b *Builder) ListPushgatewayMetrics(ec echo.Context) error {
 			m.Type = *metric.Type
 		}
 		if metric.ExpiresAt != nil {
-			m.ExpiresAt = *metric.ExpiresAt
+			m.ExpiresAt = metric.ExpiresAt
 		}
 		result = append(result, m)
 	}

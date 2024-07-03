@@ -1,4 +1,4 @@
-# github.com/appclacks/go-client v0.0.0-20240618204225-51a556fa72ba
+# github.com/appclacks/go-client v0.0.0-20240703204325-c8a3257d9e08
 ## explicit; go 1.22.0
 github.com/appclacks/go-client
 # github.com/baidubce/bce-sdk-go v0.9.182
