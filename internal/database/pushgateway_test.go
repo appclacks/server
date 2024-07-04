@@ -89,7 +89,7 @@ func TestPushgatewayCRUD(t *testing.T) {
 	metric, err = TestComponent.GetMetrics(context.Background())
 	assert.NoError(t, err)
 	assert.Len(t, metric, 1)
-	assert.Equal(t, metric[0].Value, float32(8000))
+	assert.Equal(t, metric[0].Value, float64(8000))
 
 	// new metric by name
 	desc3 := "description"

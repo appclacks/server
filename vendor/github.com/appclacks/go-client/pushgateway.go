@@ -16,7 +16,7 @@ type PushgatewayMetric struct {
 	Type        string            `json:"type"`
 	CreatedAt   time.Time         `json:"created_at"`
 	ExpiresAt   *time.Time        `json:"expires_at,omitempty"`
-	Value       float32           `json:"value"`
+	Value       float64           `json:"value"`
 }
 
 type CreateOrUpdatePushgatewayMetricInput struct {
@@ -25,7 +25,7 @@ type CreateOrUpdatePushgatewayMetricInput struct {
 	Labels      map[string]string `json:"labels" description:"Healthcheck labels" validate:"dive,keys,max=255,min=1,endkeys,max=255,min=1"`
 	TTL         string            `json:"ttl"`
 	Type        string            `json:"type" validate:"omitempty,oneof=counter gauge histogram summary"`
-	Value       float32           `json:"value" validate:"required"`
+	Value       float64           `json:"value" validate:"required"`
 }
 
 type DeletePushgatewayMetricInput struct {
@@ -59,6 +59,15 @@ func (c *Client) ListPushgatewayMetrics(ctx context.Context) (ListPushgatewayMet
 	_, err := c.sendRequest(ctx, "/api/v1/pushgateway", http.MethodGet, nil, &result, nil)
 	if err != nil {
 		return ListPushgatewayMetricsOutput{}, err
+	}
+	return result, nil
+}
+
+func (c *Client) DeleteAllPushgatewayMetrics(ctx context.Context) (Response, error) {
+	var result Response
+	_, err := c.sendRequest(ctx, "/api/v1/pushgateway", http.MethodDelete, nil, &result, nil)
+	if err != nil {
+		return Response{}, err
 	}
 	return result, nil
 }

@@ -3,6 +3,7 @@ package pushgateway
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -29,13 +30,34 @@ func (s *Service) PrometheusMetrics(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	sort.Slice(metrics, func(i, j int) bool {
+		return strings.Compare(metrics[i].Name, metrics[j].Name) == -1
+	})
+	metricsDescriptions := make(map[string]string)
+	// double iteration to build metrics descriptions once
 	for _, metric := range metrics {
 		name := metric.Name
+		description := ""
 		if metric.Description != nil {
-			result += fmt.Sprintf("\nHELP %s %s\n", name, *metric.Description)
+			description += fmt.Sprintf("# HELP %s %s\n", name, *metric.Description)
 		}
 		if metric.Type != nil {
-			result += fmt.Sprintf("TYPE %s %s\n", name, *metric.Type)
+			description += fmt.Sprintf("# TYPE %s %s\n", name, *metric.Type)
+		}
+		if description != "" {
+			metricsDescriptions[name] = description
+		}
+	}
+
+	for _, metric := range metrics {
+		name := metric.Name
+		description, ok := metricsDescriptions[name]
+		if ok {
+			result += description
+			// don't fetch this description again
+			// the metrics being sorted, we only want to print
+			// the description once at the first occurence
+			delete(metricsDescriptions, name)
 		}
 		labels := ""
 		if len(metric.Labels) == 0 {
@@ -45,7 +67,8 @@ func (s *Service) PrometheusMetrics(ctx context.Context) (string, error) {
 			for k, v := range metric.Labels {
 				labelsList = append(labelsList, fmt.Sprintf("%s=\"%s\"", k, v))
 			}
-			labels = fmt.Sprintf("{%s}", strings.Join(labelsList, ","))
+			sort.Strings(labelsList)
+			labels = fmt.Sprintf("{%s}", strings.Join(labelsList, ", "))
 
 		}
 		result += fmt.Sprintf("%s%s %f\n", metric.Name, labels, metric.Value)

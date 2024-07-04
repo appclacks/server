@@ -20,7 +20,7 @@ type pushgatewayMetric struct {
 	Type        *string
 	CreatedAt   time.Time  `db:"created_at"`
 	ExpiresAt   *time.Time `db:"expires_at"`
-	Value       float32
+	Value       float64
 }
 
 func toPushGatewayMetric(metric *pushgatewayMetric) (*aggregates.PushgatewayMetric, error) {

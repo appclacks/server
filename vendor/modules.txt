@@ -1,4 +1,4 @@
-# github.com/appclacks/go-client v0.0.0-20240703205617-8b0425724375
+# github.com/appclacks/go-client v0.0.0-20240704181602-986408774b6c
 ## explicit; go 1.22.0
 github.com/appclacks/go-client
 # github.com/baidubce/bce-sdk-go v0.9.182
@@ -87,8 +87,6 @@ github.com/mattn/go-isatty
 # github.com/mcorbin/corbierror v0.0.0-20220804210425-326e0b6f18e4
 ## explicit; go 1.18
 github.com/mcorbin/corbierror
-# github.com/pkg/errors v0.9.1
-## explicit
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
@@ -116,9 +114,13 @@ github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 ## explicit; go 1.12
 github.com/spf13/pflag
+# github.com/stretchr/objx v0.5.0
+## explicit; go 1.12
+github.com/stretchr/objx
 # github.com/stretchr/testify v1.8.4
 ## explicit; go 1.20
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/mock
 # github.com/valyala/bytebufferpool v1.0.0
 ## explicit
 github.com/valyala/bytebufferpool

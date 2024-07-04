@@ -1,0 +1,6 @@
+with-expecter: true
+packages:
+  github.com/appclacks/server/pkg/pushgateway:
+    interfaces:
+      Store:
+        config:

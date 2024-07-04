@@ -11,5 +11,5 @@ type PushgatewayMetric struct {
 	Type        *string
 	CreatedAt   time.Time
 	ExpiresAt   *time.Time
-	Value       float32
+	Value       float64
 }
