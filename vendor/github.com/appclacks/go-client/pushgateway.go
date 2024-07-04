@@ -29,7 +29,7 @@ type CreateOrUpdatePushgatewayMetricInput struct {
 }
 
 type DeletePushgatewayMetricInput struct {
-	Identifier string `json:"identifier" validate:"required"`
+	Identifier string `param:"identifier" validate:"required"`
 }
 
 type ListPushgatewayMetricsOutput struct {

@@ -18,6 +18,8 @@ github.com/appclacks/go-client v0.0.0-20240618204225-51a556fa72ba h1://S8sLRrM/2
 github.com/appclacks/go-client v0.0.0-20240618204225-51a556fa72ba/go.mod h1:ZOQEaU5H5BTLZr326dMjvVbB+pdkeRX3emyu4cEq9GU=
 github.com/appclacks/go-client v0.0.0-20240703204325-c8a3257d9e08 h1:vjf4pQGIx8BCj1+wEsNBR04lyVzje74O7ozJQn6JO3w=
 github.com/appclacks/go-client v0.0.0-20240703204325-c8a3257d9e08/go.mod h1:ZOQEaU5H5BTLZr326dMjvVbB+pdkeRX3emyu4cEq9GU=
+github.com/appclacks/go-client v0.0.0-20240703205617-8b0425724375 h1:eVJ+l4qRByZ2L9O4xl2HC009T7TMw2z5EPnf+ArUH3A=
+github.com/appclacks/go-client v0.0.0-20240703205617-8b0425724375/go.mod h1:ZOQEaU5H5BTLZr326dMjvVbB+pdkeRX3emyu4cEq9GU=
 github.com/baidubce/bce-sdk-go v0.9.182 h1:DUNNEzQh5Gk198izzjt39L/HlURbltTK4nBzNfEn6HQ=
 github.com/baidubce/bce-sdk-go v0.9.182/go.mod h1:zbYJMQwE4IZuyrJiFO8tO8NbtYiKTFTbwh4eIsqjVdg=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
