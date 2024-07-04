@@ -23,6 +23,7 @@ type PushgatewayService interface {
 	DeleteMetricsByName(ctx context.Context, name string) error
 	DeleteMetricByID(ctx context.Context, id string) error
 	PrometheusMetrics(ctx context.Context) (string, error)
+	DeleteAllPushgatewayMetrics(ctx context.Context) error
 }
 
 type Builder struct {

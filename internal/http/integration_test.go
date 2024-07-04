@@ -871,8 +871,8 @@ func TestIntegration(t *testing.T) {
 		},
 		{
 			url:            "/api/v1/pushgateway",
-			expectedStatus: 404,
-			body:           "Not Found",
+			expectedStatus: 200,
+			body:           "metrics deleted",
 			method:         "DELETE",
 			headers: map[string]string{
 				"Authorization": basicAuth(testUser, testPassword),

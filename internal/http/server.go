@@ -121,6 +121,7 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 	apiGroup.GET("/healthcheck", builder.ListHealthchecks)
 	apiGroup.GET("/cabourotte/discovery", builder.CabourotteDiscovery)
 	apiGroup.POST("/pushgateway", builder.CreateOrUpdatePushgatewayMetric)
+	apiGroup.DELETE("/pushgateway", builder.DeleteAllPushgatewayMetrics)
 	apiGroup.DELETE("/pushgateway/:identifier", builder.DeleteMetric)
 	apiGroup.GET("/pushgateway", builder.ListPushgatewayMetrics)
 	apiGroup.GET("/pushgateway/prometheus/metrics", builder.PushgatewayMetrics)

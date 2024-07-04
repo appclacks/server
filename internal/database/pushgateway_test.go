@@ -180,4 +180,14 @@ func TestPushgatewayCRUD(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, int64(5), deleteCount)
 
+	metric, err = TestComponent.GetMetrics(context.Background())
+	assert.NoError(t, err)
+	assert.Len(t, metric, 5)
+
+	err = TestComponent.DeleteAllPushgatewayMetrics(context.Background())
+	assert.NoError(t, err)
+
+	metric, err = TestComponent.GetMetrics(context.Background())
+	assert.NoError(t, err)
+	assert.Len(t, metric, 0)
 }

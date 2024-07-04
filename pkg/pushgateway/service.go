@@ -16,6 +16,7 @@ type Store interface {
 	DeleteMetricsByName(ctx context.Context, name string) error
 	DeleteMetricByID(ctx context.Context, id string) error
 	CleanPushgatewayMetrics(ctx context.Context) (int64, error)
+	DeleteAllPushgatewayMetrics(ctx context.Context) error
 }
 
 type Service struct {

@@ -63,6 +63,11 @@ func (s *Service) DeleteMetricByID(ctx context.Context, id string) error {
 	return s.store.DeleteMetricByID(ctx, id)
 }
 
+func (s *Service) DeleteAllPushgatewayMetrics(ctx context.Context) error {
+	s.logger.Debug("deleting all push gateway metrics")
+	return s.store.DeleteAllPushgatewayMetrics(ctx)
+}
+
 func (s *Service) CleanPushgatewayMetrics(ctx context.Context) {
 	numberMetricsDeleted, err := s.store.CleanPushgatewayMetrics(ctx)
 	if err != nil {

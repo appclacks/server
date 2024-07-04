@@ -85,6 +85,15 @@ func (b *Builder) DeleteMetric(ec echo.Context) error {
 	return ec.JSON(http.StatusOK, NewResponse("metrics deleted"))
 }
 
+func (b *Builder) DeleteAllPushgatewayMetrics(ec echo.Context) error {
+
+	err := b.pushgateway.DeleteAllPushgatewayMetrics(ec.Request().Context())
+	if err != nil {
+		return err
+	}
+	return ec.JSON(http.StatusOK, NewResponse("metrics deleted"))
+}
+
 func (b *Builder) ListPushgatewayMetrics(ec echo.Context) error {
 	metrics, err := b.pushgateway.GetMetrics(ec.Request().Context())
 	if err != nil {

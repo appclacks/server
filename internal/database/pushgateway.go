@@ -185,3 +185,15 @@ func (c *Database) CleanPushgatewayMetrics(ctx context.Context) (int64, error) {
 	}
 	return affected, nil
 }
+
+func (c *Database) DeleteAllPushgatewayMetrics(ctx context.Context) error {
+	result, err := c.db.ExecContext(ctx, "TRUNCATE pushgateway_metric")
+	if err != nil {
+		return fmt.Errorf("fail to clean all pushgateway metrics: %w", err)
+	}
+	_, err = result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("fail to check affected row: %w", err)
+	}
+	return nil
+}
