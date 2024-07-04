@@ -746,12 +746,9 @@ func TestIntegration(t *testing.T) {
 	// delete 2 first metrics by name
 
 	DeletePushgatewayMetrics := testCase{
-		url:            "/api/v1/pushgateway",
+		url:            fmt.Sprintf("/api/v1/pushgateway/%s", pushgatewayMetricInput.Name),
 		expectedStatus: 200,
-		payload: client.DeletePushgatewayMetricInput{
-			Identifier: pushgatewayMetricInput.Name,
-		},
-		method: "DELETE",
+		method:         "DELETE",
 		headers: map[string]string{
 			"Authorization": basicAuth(testUser, testPassword),
 		},
@@ -775,12 +772,9 @@ func TestIntegration(t *testing.T) {
 	// delete by ID
 
 	DeletePushgatewayMetrics = testCase{
-		url:            "/api/v1/pushgateway",
+		url:            fmt.Sprintf("/api/v1/pushgateway/%s", listMetricsResult.Result[0].ID),
 		expectedStatus: 200,
-		payload: client.DeletePushgatewayMetricInput{
-			Identifier: listMetricsResult.Result[0].ID,
-		},
-		method: "DELETE",
+		method:         "DELETE",
 		headers: map[string]string{
 			"Authorization": basicAuth(testUser, testPassword),
 		},
@@ -877,8 +871,8 @@ func TestIntegration(t *testing.T) {
 		},
 		{
 			url:            "/api/v1/pushgateway",
-			expectedStatus: 400,
-			body:           "Field validation for",
+			expectedStatus: 404,
+			body:           "Not Found",
 			method:         "DELETE",
 			headers: map[string]string{
 				"Authorization": basicAuth(testUser, testPassword),
