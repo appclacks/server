@@ -47,7 +47,7 @@ func InitTLSHealthcheck(healthcheck *aggregates.Healthcheck) {
 }
 
 func (s *Service) CreateHealthcheck(ctx context.Context, healthcheck *aggregates.Healthcheck) error {
-	s.logger.Debug(fmt.Sprintf("creating healthcheck %s", healthcheck.Name))
+	s.logger.Info(fmt.Sprintf("creating healthcheck %s", healthcheck.Name))
 	interval, err := time.ParseDuration(healthcheck.Interval)
 	if err != nil {
 		return er.New("Invalid healthcheck interval", er.BadRequest, true)
@@ -66,7 +66,7 @@ func (s *Service) CreateHealthcheck(ctx context.Context, healthcheck *aggregates
 }
 
 func (s *Service) UpdateHealthcheck(ctx context.Context, healthcheck *aggregates.Healthcheck) error {
-	s.logger.Debug(fmt.Sprintf("updating healthcheck %s", healthcheck.Name))
+	s.logger.Info(fmt.Sprintf("updating healthcheck %s", healthcheck.Name))
 	err := validator.Validator.Struct(*healthcheck)
 	if err != nil {
 		return err
@@ -97,7 +97,7 @@ func (s *Service) GetHealthcheckByName(ctx context.Context, name string) (*aggre
 }
 
 func (s *Service) DeleteHealthcheck(ctx context.Context, id string) error {
-	s.logger.Debug(fmt.Sprintf("deleting healthcheck %s", id))
+	s.logger.Info(fmt.Sprintf("deleting healthcheck %s", id))
 	return s.store.DeleteHealthcheck(ctx, id)
 }
 
