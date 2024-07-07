@@ -18,7 +18,6 @@ RUN chown -R 10000:10000 /app
 USER 10000
 
 COPY --from=build-env /app/server /app/server
-COPY ./dev/migrations /app/migrations
 
 ENTRYPOINT ["/app/server"]
 CMD ["server", "--config", "/app/config/config.yaml"]

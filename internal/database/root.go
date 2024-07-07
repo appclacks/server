@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -11,10 +12,14 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	er "github.com/mcorbin/corbierror"
 )
+
+//go:embed migrations/*.sql
+var migrationsFS embed.FS
 
 type Database struct {
 	db      *sqlx.DB
@@ -49,8 +54,13 @@ func New(logger *slog.Logger, config Configuration, probers uint) (*Database, er
 	if err != nil {
 		return nil, fmt.Errorf("fail to create postgres migration driver: %w", err)
 	}
-	m, err := migrate.NewWithDatabaseInstance(
-		fmt.Sprintf("file://%s", config.Migrations),
+	source, err := iofs.New(migrationsFS, "migrations")
+	if err != nil {
+		return nil, fmt.Errorf("fail to create source  migration driver: %w", err)
+	}
+	m, err := migrate.NewWithInstance(
+		"iofs",
+		source,
 		"postgres",
 		driver)
 	if err != nil {
