@@ -16,7 +16,7 @@ type Configuration struct {
 	Cert       string
 	Cacert     string
 	Insecure   bool
-	ServerName string
+	ServerName string    `yaml:"server-name"`
 	BasicAuth  BasicAuth `yaml:"basic-auth"`
 	Metrics    Metrics
 }
