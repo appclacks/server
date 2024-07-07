@@ -114,13 +114,12 @@ func TestIntegration(t *testing.T) {
 	reg := prometheus.NewRegistry()
 	config := config.Configuration{
 		Database: database.Configuration{
-			Migrations: "../../dev/migrations",
-			Username:   "appclacks",
-			Password:   "appclacks",
-			Database:   "appclacks",
-			Host:       "127.0.0.1",
-			Port:       5432,
-			SSLMode:    "disable",
+			Username: "appclacks",
+			Password: "appclacks",
+			Database: "appclacks",
+			Host:     "127.0.0.1",
+			Port:     5432,
+			SSLMode:  "disable",
 		},
 		HTTP: apihttp.Configuration{
 			Host: "127.0.0.1",

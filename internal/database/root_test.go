@@ -14,13 +14,12 @@ var TestComponent *database.Database
 func InitTestDB(logger *slog.Logger) *database.Database {
 
 	config := database.Configuration{
-		Migrations: "../../dev/migrations",
-		Username:   "appclacks",
-		Password:   "appclacks",
-		Database:   "appclacks",
-		Host:       "127.0.0.1",
-		Port:       5432,
-		SSLMode:    "disable",
+		Username: "appclacks",
+		Password: "appclacks",
+		Database: "appclacks",
+		Host:     "127.0.0.1",
+		Port:     5432,
+		SSLMode:  "disable",
 	}
 	c, err := database.New(logger, config, 1)
 	if err != nil {
