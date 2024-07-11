@@ -1,0 +1,11 @@
+http:
+  host: "0.0.0.0"
+  port: 9013
+discovery:
+    http:
+      - name: "http-discorery"
+        interval: 10s
+        host: "localhost"
+        port: 9000
+        protocol: "http"
+        path: "/api/v1/cabourotte/discovery"

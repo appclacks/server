@@ -1,0 +1,24 @@
+services:
+  server:
+    depends_on:
+      - postgres
+    image: "appclacks/server:v0.2.0"
+    volumes:
+      - "./dev:/app/config"
+    network_mode: "host"
+    ports:
+      - "9000:9000"
+  postgres:
+    image: "postgres:14.4"
+    network_mode: "host"
+    environment:
+      POSTGRES_DB: appclacks
+      POSTGRES_USER: appclacks
+      POSTGRES_PASSWORD: appclacks
+  cabourotte:
+    image: "appclacks/cabourotte:v2.0.0"
+    volumes:
+      - "./dev/cabourotte.yaml:/cabourotte.yaml"
+    network_mode: "host"
+    depends_on:
+      - server
