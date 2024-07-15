@@ -26,7 +26,7 @@ func TestPushgatewayCRUD(t *testing.T) {
 		TTL:       &ttl1,
 		CreatedAt: now1,
 		ExpiresAt: &expired1,
-		Value:     1000,
+		Value:     "1000",
 	}
 	id1, err := TestComponent.CreateOrUpdatePushgatewayMetric(context.Background(), def1, false)
 	assert.NoError(t, err)
@@ -61,7 +61,7 @@ func TestPushgatewayCRUD(t *testing.T) {
 		TTL:       &ttl2,
 		CreatedAt: now2,
 		ExpiresAt: &expired2,
-		Value:     4000,
+		Value:     "4000",
 	}
 
 	id2, err := TestComponent.CreateOrUpdatePushgatewayMetric(context.Background(), update1, false)
@@ -89,7 +89,7 @@ func TestPushgatewayCRUD(t *testing.T) {
 	metric, err = TestComponent.GetMetrics(context.Background())
 	assert.NoError(t, err)
 	assert.Len(t, metric, 1)
-	assert.Equal(t, metric[0].Value, float64(8000))
+	assert.Equal(t, metric[0].Value, "8000.000000")
 
 	// new metric by name
 	desc3 := "description"
@@ -106,7 +106,7 @@ func TestPushgatewayCRUD(t *testing.T) {
 		TTL:       &ttl3,
 		CreatedAt: now3,
 		ExpiresAt: &expired3,
-		Value:     1000,
+		Value:     "1000",
 	}
 
 	_, err = TestComponent.CreateOrUpdatePushgatewayMetric(context.Background(), def3, false)
@@ -130,7 +130,7 @@ func TestPushgatewayCRUD(t *testing.T) {
 		TTL:       &ttl4,
 		CreatedAt: now4,
 		ExpiresAt: &expired4,
-		Value:     1000,
+		Value:     "1000",
 	}
 
 	_, err = TestComponent.CreateOrUpdatePushgatewayMetric(context.Background(), def4, false)
@@ -171,7 +171,7 @@ func TestPushgatewayCRUD(t *testing.T) {
 			TTL:       &ttl1,
 			CreatedAt: now1,
 			ExpiresAt: &expiresAt,
-			Value:     1000,
+			Value:     "1000",
 		}
 		_, err := TestComponent.CreateOrUpdatePushgatewayMetric(context.Background(), def1, false)
 		assert.NoError(t, err)

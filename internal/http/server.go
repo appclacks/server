@@ -90,8 +90,10 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 			return false, nil
 		})
 		e.GET("/metrics", echo.WrapHandler(promhttp.HandlerFor(registry, promhttp.HandlerOpts{})), basicAuth)
+		e.GET("/pushgateway/metrics", builder.PushgatewayMetrics, basicAuth)
 	} else {
 		e.GET("/metrics", echo.WrapHandler(promhttp.HandlerFor(registry, promhttp.HandlerOpts{})))
+		e.GET("/pushgateway/metrics", builder.PushgatewayMetrics)
 	}
 
 	apiGroup := e.Group("/api/v1")
@@ -124,7 +126,6 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 	apiGroup.DELETE("/pushgateway", builder.DeleteAllPushgatewayMetrics)
 	apiGroup.DELETE("/pushgateway/:identifier", builder.DeleteMetric)
 	apiGroup.GET("/pushgateway", builder.ListPushgatewayMetrics)
-	apiGroup.GET("/pushgateway/prometheus/metrics", builder.PushgatewayMetrics)
 
 	return &Server{
 		server: e,

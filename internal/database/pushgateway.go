@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/appclacks/server/internal/util"
@@ -20,7 +21,7 @@ type pushgatewayMetric struct {
 	Type        *string
 	CreatedAt   time.Time  `db:"created_at"`
 	ExpiresAt   *time.Time `db:"expires_at"`
-	Value       float64
+	Value       string
 }
 
 func toPushGatewayMetric(metric *pushgatewayMetric) (*aggregates.PushgatewayMetric, error) {
@@ -104,7 +105,15 @@ func (c *Database) CreateOrUpdatePushgatewayMetric(ctx context.Context, metric a
 		metricID = currentMetric.ID
 		metricValue := metric.Value
 		if cumulative {
-			metricValue += currentMetric.Value
+			current, err := strconv.ParseFloat(currentMetric.Value, 64)
+			if err != nil {
+				return "", err
+			}
+			new, err := strconv.ParseFloat(metricValue, 64)
+			if err != nil {
+				return "", err
+			}
+			metricValue = fmt.Sprintf("%f", current+new)
 		}
 		updatedMetric := pushgatewayMetric{
 			ID:          currentMetric.ID,

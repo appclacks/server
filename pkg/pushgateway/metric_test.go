@@ -39,10 +39,10 @@ func TestPrometheusMetrics(t *testing.T) {
 			metrics: []*aggregates.PushgatewayMetric{
 				{
 					Name:  "metric1",
-					Value: 123.4,
+					Value: "123.4",
 				},
 			},
-			result: "metric1{} 123.400000\n",
+			result: "metric1{} 123.4\n",
 		},
 		{
 			metrics: []*aggregates.PushgatewayMetric{
@@ -50,12 +50,12 @@ func TestPrometheusMetrics(t *testing.T) {
 					Name:        "metric2",
 					Description: &desc1,
 					Type:        &type1,
-					Value:       121,
+					Value:       "121",
 				},
 			},
 			result: `# HELP metric2 my description
 # TYPE metric2 gauge
-metric2{} 121.000000
+metric2{} 121
 `,
 		},
 		{
@@ -67,12 +67,12 @@ metric2{} 121.000000
 					Labels: map[string]string{
 						"env": "test",
 					},
-					Value: 121,
+					Value: "121",
 				},
 			},
 			result: `# HELP metric2 my description
 # TYPE metric2 gauge
-metric2{env="test"} 121.000000
+metric2{env="test"} 121
 `,
 		},
 		{
@@ -81,11 +81,11 @@ metric2{env="test"} 121.000000
 					Name:        "metric1",
 					Description: &desc1,
 					Type:        &type1,
-					Value:       121,
+					Value:       "121",
 				},
 				{
 					Name:  "metric2",
-					Value: 10.1,
+					Value: "10.1",
 					Labels: map[string]string{
 						"env":  "prod",
 						"team": "sre",
@@ -99,30 +99,30 @@ metric2{env="test"} 121.000000
 						"env":  "staging",
 						"team": "data",
 					},
-					Value: 121,
+					Value: "121",
 				},
 			},
 			result: `# HELP metric1 my description
 # TYPE metric1 gauge
-metric1{} 121.000000
+metric1{} 121
 # HELP metric2 my super description
 # TYPE metric2 counter
-metric2{env="prod", team="sre"} 10.100000
-metric2{env="staging", team="data"} 121.000000
+metric2{env="prod", team="sre"} 10.1
+metric2{env="staging", team="data"} 121
 `,
 		},
 		{
 			metrics: []*aggregates.PushgatewayMetric{
 				{
 					Name:  "metric3",
-					Value: 123.4567,
+					Value: "123.4567",
 					Labels: map[string]string{
 						"team": "backend",
 					},
 				},
 				{
 					Name:  "metric4",
-					Value: 123.4567,
+					Value: "123.4567",
 					Labels: map[string]string{
 						"team": "front",
 					},
@@ -131,11 +131,11 @@ metric2{env="staging", team="data"} 121.000000
 					Name:        "metric1",
 					Description: &desc1,
 					Type:        &type1,
-					Value:       121,
+					Value:       "121",
 				},
 				{
 					Name:  "metric2",
-					Value: 10.1,
+					Value: "10.1",
 					Labels: map[string]string{
 						"env":  "prod",
 						"team": "sre",
@@ -149,18 +149,18 @@ metric2{env="staging", team="data"} 121.000000
 						"env":  "staging",
 						"team": "data",
 					},
-					Value: 121,
+					Value: "121",
 				},
 			},
 			result: `# HELP metric1 my description
 # TYPE metric1 gauge
-metric1{} 121.000000
+metric1{} 121
 # HELP metric2 my super description
 # TYPE metric2 counter
-metric2{env="prod", team="sre"} 10.100000
-metric2{env="staging", team="data"} 121.000000
-metric3{team="backend"} 123.456700
-metric4{team="front"} 123.456700
+metric2{env="prod", team="sre"} 10.1
+metric2{env="staging", team="data"} 121
+metric3{team="backend"} 123.4567
+metric4{team="front"} 123.4567
 `,
 		},
 	}

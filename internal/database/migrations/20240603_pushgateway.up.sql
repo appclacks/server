@@ -4,7 +4,7 @@ create table if not exists pushgateway_metric (
   description varchar(255),
   ttl varchar(255),
   labels jsonb default '{}'::jsonb,
-  value double precision,
+  value varchar(255),
   type varchar(255),
   created_at timestamp not null,
   expires_at timestamp

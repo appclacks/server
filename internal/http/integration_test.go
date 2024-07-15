@@ -640,7 +640,7 @@ func TestIntegration(t *testing.T) {
 		},
 		TTL:   "200s",
 		Type:  "counter",
-		Value: 100.1,
+		Value: "100.1",
 	}
 
 	createPushgatewayMetricCase := testCase{
@@ -690,7 +690,7 @@ func TestIntegration(t *testing.T) {
 		},
 		TTL:   "200s",
 		Type:  "counter",
-		Value: 100.1,
+		Value: "100.1",
 	}
 
 	createPushgatewayMetricNewLabelCase := testCase{
@@ -712,7 +712,7 @@ func TestIntegration(t *testing.T) {
 		},
 		TTL:   "200s",
 		Type:  "counter",
-		Value: 100.1,
+		Value: "100.1",
 	}
 
 	createPushgatewayMetricNewName := testCase{

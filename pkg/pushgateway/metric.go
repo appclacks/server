@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,6 +18,10 @@ func InitPushgatewayMetric(metric *aggregates.PushgatewayMetric) {
 
 func (s *Service) CreateOrUpdatePushgatewayMetric(ctx context.Context, metric aggregates.PushgatewayMetric, cumulative bool) (string, error) {
 	s.logger.Info(fmt.Sprintf("creating or updating metric %s", metric.Name))
+	_, err := strconv.ParseFloat(metric.Value, 64)
+	if err != nil {
+		return "", fmt.Errorf("fail to convert metric value %s to float64", metric.Value)
+	}
 	return s.store.CreateOrUpdatePushgatewayMetric(ctx, metric, cumulative)
 }
 
@@ -71,7 +76,7 @@ func (s *Service) PrometheusMetrics(ctx context.Context) (string, error) {
 			labels = fmt.Sprintf("{%s}", strings.Join(labelsList, ", "))
 
 		}
-		result += fmt.Sprintf("%s%s %f\n", metric.Name, labels, metric.Value)
+		result += fmt.Sprintf("%s%s %s\n", metric.Name, labels, metric.Value)
 	}
 	return result, nil
 }
