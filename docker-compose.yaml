@@ -2,7 +2,7 @@ services:
   server:
     depends_on:
       - postgres
-    image: "appclacks/server:v0.2.0"
+    image: "appclacks/server:v0.2.2"
     volumes:
       - "./dev:/app/config"
     network_mode: "host"

@@ -6,7 +6,6 @@ http:
   #   username: "foo"
   #   password: "bar"
 database:
-  migrations: "../server/dev/migrations"
   username: "appclacks"
   password: "appclacks"
   database: "appclacks"
