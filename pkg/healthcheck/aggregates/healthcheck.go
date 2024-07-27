@@ -22,4 +22,5 @@ type Healthcheck struct {
 type Query struct {
 	Enabled *bool
 	Regex   *regexp.Regexp
+	Prober  uint
 }

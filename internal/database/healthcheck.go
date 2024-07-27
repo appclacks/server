@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
@@ -156,32 +157,25 @@ func (c *Database) DeleteHealthcheck(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Database) ListHealthchecks(ctx context.Context, enabled *bool) ([]*aggregates.Healthcheck, error) {
+func (c *Database) ListHealthchecks(ctx context.Context, enabled *bool, prober uint) ([]*aggregates.Healthcheck, error) {
 	healthchecks := []dbHealthcheck{}
+	clauses := []string{}
+	params := []any{}
+	// TODO: use a query builder
 	baseQuery := "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck"
-	if enabled != nil {
-		baseQuery = fmt.Sprintf("%s WHERE enabled is %t", baseQuery, *enabled)
-	}
-	err := c.db.SelectContext(ctx, &healthchecks, baseQuery)
-	if err != nil {
-		return nil, fmt.Errorf("fail to list healthchecks: %w", err)
-	}
-	result := []*aggregates.Healthcheck{}
-	for i := range healthchecks {
-		healthcheck := healthchecks[i]
-		hc, err := toHealthcheck(&healthcheck)
-		if err != nil {
-			return nil, err
+	if enabled != nil || prober != 0 {
+		if enabled != nil {
+			clauses = append(clauses, fmt.Sprintf("enabled is %t", *enabled))
 		}
-		result = append(result, hc)
+		if prober != 0 {
+			clauses = append(clauses, "healthcheck.random_id%$1=$2")
+			params = append(params, c.probers, prober)
+		}
 	}
-
-	return result, nil
-}
-
-func (c *Database) ListHealthchecksForProber(ctx context.Context, prober int) ([]*aggregates.Healthcheck, error) {
-	healthchecks := []dbHealthcheck{}
-	err := c.db.SelectContext(ctx, &healthchecks, "SELECT healthcheck.id, healthcheck.name, healthcheck.description, healthcheck.labels, healthcheck.created_at, healthcheck.definition, healthcheck.type, healthcheck.interval, healthcheck.random_id, healthcheck.enabled, healthcheck.timeout FROM healthcheck WHERE healthcheck.random_id%$1=$2 AND healthcheck.enabled=true", c.probers, prober)
+	if len(clauses) != 0 {
+		baseQuery = fmt.Sprintf("%s WHERE %s", baseQuery, strings.Join(clauses, " AND "))
+	}
+	err := c.db.SelectContext(ctx, &healthchecks, baseQuery, params...)
 	if err != nil {
 		return nil, fmt.Errorf("fail to list healthchecks: %w", err)
 	}

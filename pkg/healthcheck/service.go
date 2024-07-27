@@ -13,8 +13,7 @@ type Store interface {
 	GetHealthcheck(ctx context.Context, id string) (*aggregates.Healthcheck, error)
 	GetHealthcheckByName(ctx context.Context, name string) (*aggregates.Healthcheck, error)
 	DeleteHealthcheck(ctx context.Context, id string) error
-	ListHealthchecks(ctx context.Context, enabled *bool) ([]*aggregates.Healthcheck, error)
-	ListHealthchecksForProber(ctx context.Context, prober int) ([]*aggregates.Healthcheck, error)
+	ListHealthchecks(ctx context.Context, enabled *bool, prober uint) ([]*aggregates.Healthcheck, error)
 	CountHealthchecks(ctx context.Context) (int, error)
 }
 

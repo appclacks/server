@@ -143,7 +143,10 @@ func (b *Builder) CabourotteDiscovery(ec echo.Context) error {
 		}
 	}
 	t := true
-	query := aggregates.Query{Enabled: &t}
+	query := aggregates.Query{
+		Enabled: &t,
+		Prober:  payload.Prober,
+	}
 	healthchecks, err := b.healthcheck.ListHealthchecks(ec.Request().Context(), query)
 	if err != nil {
 		return err

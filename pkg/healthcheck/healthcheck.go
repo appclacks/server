@@ -102,7 +102,7 @@ func (s *Service) DeleteHealthcheck(ctx context.Context, id string) error {
 }
 
 func (s *Service) ListHealthchecks(ctx context.Context, query aggregates.Query) ([]*aggregates.Healthcheck, error) {
-	checks, err := s.store.ListHealthchecks(ctx, query.Enabled)
+	checks, err := s.store.ListHealthchecks(ctx, query.Enabled, query.Prober)
 	if err != nil {
 		return nil, err
 	}

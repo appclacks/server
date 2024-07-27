@@ -139,6 +139,7 @@ type ListHealthchecksOutput struct {
 type CabourotteDiscoveryInput struct {
 	// foo=bar,a=b
 	Labels string `query:"labels"`
+	Prober uint   `query:"prober"`
 }
 
 type CabourotteDiscoveryOutput struct {

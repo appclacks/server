@@ -3,7 +3,7 @@ module github.com/appclacks/server
 go 1.22.0
 
 require (
-	github.com/appclacks/go-client v0.0.0-20240715201443-0ce681171dc2
+	github.com/appclacks/go-client v0.0.0-20240727202531-75f46b6cdb27
 	github.com/baidubce/bce-sdk-go v0.9.182
 	github.com/go-playground/validator/v10 v10.21.0
 	github.com/golang-migrate/migrate/v4 v4.17.1

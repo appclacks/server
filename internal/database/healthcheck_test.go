@@ -27,6 +27,7 @@ func TestHealthcheckCRUD(t *testing.T) {
 		Definition: def1,
 		Interval:   "60s",
 		Enabled:    true,
+		RandomID:   1,
 	}
 	err := TestComponent.CreateHealthcheck(context.Background(), &healthcheck)
 	assert.NoError(t, err)
@@ -49,11 +50,15 @@ func TestHealthcheckCRUD(t *testing.T) {
 	}
 
 	f := false
-	listChecks, err := TestComponent.ListHealthchecks(context.Background(), &f)
+	listChecks, err := TestComponent.ListHealthchecks(context.Background(), &f, 0)
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(listChecks))
 
-	listChecks, err = TestComponent.ListHealthchecks(context.Background(), nil)
+	listChecks, err = TestComponent.ListHealthchecks(context.Background(), nil, 1)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(listChecks))
+
+	listChecks, err = TestComponent.ListHealthchecks(context.Background(), nil, 0)
 	assert.NoError(t, err)
 	firstCheck := listChecks[0]
 	newLabels := map[string]string{"update": "yes"}

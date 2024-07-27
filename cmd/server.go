@@ -44,6 +44,9 @@ func runServer(logger *slog.Logger) error {
 	if err := yaml.Unmarshal(file, &config); err != nil {
 		return fmt.Errorf("fail to parse yaml configuration file: %w", err)
 	}
+	if config.Healthchecks.Probers == 0 {
+		config.Healthchecks.Probers = 1
+	}
 	store, err := database.New(logger, config.Database, config.Healthchecks.Probers)
 	if err != nil {
 		return err
