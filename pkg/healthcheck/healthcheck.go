@@ -50,17 +50,17 @@ func (s *Service) CreateHealthcheck(ctx context.Context, healthcheck *aggregates
 	s.logger.Info(fmt.Sprintf("creating healthcheck %s", healthcheck.Name))
 	interval, err := time.ParseDuration(healthcheck.Interval)
 	if err != nil {
-		return er.New("Invalid healthcheck interval", er.BadRequest, true)
+		return er.New("invalid healthcheck interval", er.BadRequest, true)
 	}
-	if interval < 30*time.Second {
-		return er.New("The minimum healthcheck interval is 30 seconds", er.BadRequest, true)
+	if interval < 5*time.Second {
+		return er.New("the minimum healthcheck interval is 5 seconds", er.BadRequest, true)
 	}
 	timeout, err := time.ParseDuration(healthcheck.Timeout)
 	if err != nil {
-		return er.New("Invalid healthcheck timeout", er.BadRequest, true)
+		return er.New("invalid healthcheck timeout", er.BadRequest, true)
 	}
 	if interval < timeout {
-		return er.New("The healthcheck interval should be greater than its timeout", er.BadRequest, true)
+		return er.New("the healthcheck interval should be greater than its timeout", er.BadRequest, true)
 	}
 	return s.store.CreateHealthcheck(ctx, healthcheck)
 }
