@@ -45,6 +45,6 @@ func ToHealthcheckDefinition(templateType string, definition string) (Healthchec
 		return &def, nil
 	}
 
-	return nil, fmt.Errorf("Invalid template type %s", templateType)
+	return nil, fmt.Errorf("invalid template type %s", templateType)
 
 }

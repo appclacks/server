@@ -16,13 +16,13 @@ services:
       POSTGRES_DB: appclacks
       POSTGRES_USER: appclacks
       POSTGRES_PASSWORD: appclacks
+    ports:
+      - "5432:5432"
   cabourotte:
     image: "appclacks/cabourotte:v2.0.0"
     volumes:
       - "./dev/cabourotte.yaml:/cabourotte.yaml"
     network_mode: "host"
-    depends_on:
-      - server
     command:
       - daemon
       - --config

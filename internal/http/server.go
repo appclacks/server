@@ -18,6 +18,7 @@ import (
 	er "github.com/mcorbin/corbierror"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 )
 
 type Server struct {
@@ -76,6 +77,7 @@ func NewServer(logger *slog.Logger, config Configuration, registry *prometheus.R
 	}
 
 	e.HTTPErrorHandler = errorHandler(logger)
+	e.Use(otelecho.Middleware("appclacks-server"))
 	e.Use(middlewares.MetricsMiddleware(reqHistogram, respCounter, logger))
 	e.GET("/healthz", func(ec echo.Context) error {
 		return ec.JSON(http.StatusOK, "ok")

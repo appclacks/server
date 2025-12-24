@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/appclacks/server/pkg/healthcheck/aggregates"
-
 	er "github.com/mcorbin/corbierror"
 )
 

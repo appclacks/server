@@ -40,7 +40,7 @@ func fromJson(t *testing.T, s any, data []byte) {
 
 func readBody(t *testing.T, body io.ReadCloser) []byte {
 	b, err := io.ReadAll(body)
-	defer body.Close()
+	defer body.Close() //nolint
 	assert.NoError(t, err)
 	return b
 }

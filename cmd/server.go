@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -15,6 +16,11 @@ import (
 	"github.com/appclacks/server/pkg/pushgateway"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"gopkg.in/yaml.v3"
 )
 
@@ -59,9 +65,30 @@ func runServer(logger *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	ctx := context.Background()
+	exp, err := otlptracehttp.New(ctx)
+	if err != nil {
+		return err
+	}
+	r := resource.NewWithAttributes(
+		semconv.SchemaURL,
+		semconv.ServiceName("appclacks-server"),
+	)
+	shutdownFn := func() {}
+	if os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT") != "" || os.Getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT") != "" {
+		logger.Info("starting opentelemetry traces export")
+		tracerProvider := trace.NewTracerProvider(trace.WithBatcher(exp), trace.WithResource(r))
+		otel.SetTracerProvider(tracerProvider)
+		shutdownFn = func() {
+			err := tracerProvider.Shutdown(context.Background())
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+	defer shutdownFn()
 	signals := make(chan os.Signal, 1)
 	errChan := make(chan error)
-
 	signal.Notify(
 		signals,
 		syscall.SIGINT,
